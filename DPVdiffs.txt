@@ -1,0 +1,1944 @@
+diff -rw @dirfiles/dirfiles.m /Users/syen/Desktop/DPV/@dirfiles/dirfiles.m
+1c1
+< function obj = dirfiles(varargin)
+---
+> function [obj, varargout] = dirfilesTemp(varargin)
+2a3,4
+> %   OBJ = dirfiles(varargin)
+> %
+3a6,18
+> %   
+> %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+> %   % Instructions on dirfiles %
+> %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+> %
+> %example [as, Args] = dirfiles('save','redo')
+> %
+> %dependencies: 
+> 
+> Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0);
+> Args.flags = {'Auto','ArgsOnly'};
+> % The arguments which can be neglected during arguments checking
+> Args.UnimportantArgs = {'RedoLevels','SaveLevels'};                            
+5,6d19
+< Args = struct('RedoLevels',0,'SaveLevels',0,'Auto',0);
+< Args.flags = {'Auto'};
+18,20c31,35
+< numArgin = nargin;
+< if(numArgin==0)
+<       % create empty object
+---
+> % To decide the method to create or load the object
+> command = checkObjCreate('ArgsC',Args,'narginC',nargin,'firstVarargin',varargin);
+> 
+> if(strcmp(command,'createEmptyObjArgs'))
+>     varargout{1} = {'Args',Args};
+22c37,39
+< elseif( (numArgin==1) & isa(varargin{1},Args.classname))
+---
+> elseif(strcmp(command,'createEmptyObj'))
+>     obj = createEmptyObject(Args);
+> elseif(strcmp(command,'passedObj'))
+24,32c41
+< else
+<       % create object using arguments
+<       if(Args.Auto)
+<         % change to the proper directory
+<         [pdir,cdir] = getDataDirs('session','relative','CDNow');
+<               % check for saved object
+<               if(~isempty(nptDir(Args.matname,'CaseInsensitive')) ...
+<                       && (Args.RedoLevels==0))
+<                       fprintf('Loading saved %s object...\n',Args.classname);
+---
+> elseif(strcmp(command,'loadObj'))
+35,48c44,48
+<             % check if the saved object's Args structure matches the
+<             % current Args structure
+<             
+<               else
+<                       % no saved object so we will try to create one
+<                       % pass varargin in case createObject needs to instantiate
+<                       % other objects that take optional input arguments
+<                       obj = createObject(Args,modvarargin{:});
+<               end
+<         % change back to previous directory if necessary
+<         if(~isempty(cdir))
+<             cd(cdir)
+<         end
+<       end
+---
+> elseif(strcmp(command,'createObj'))
+>     % IMPORTANT NOTICE!!! 
+>     % If there is additional requirements for creating the object, add
+>     % whatever needed here
+>     obj = createObject(Args,varargin{:});
+70a71,72
+>     
+>     data.Args = Args;
+74,79c76
+<       if(Args.SaveLevels)
+<               fprintf('Saving %s object...\n',Args.classname);
+<               eval([Args.matvarname ' = obj;']);
+<               % save object
+<               eval(['save ' Args.matname ' ' Args.matvarname]);
+<       end
+---
+>       saveObject(obj,'ArgsC',Args);
+95a93
+> data.Args = Args;
+diff -rw @dirfiles/get.m /Users/syen/Desktop/DPV/@dirfiles/get.m
+2a3,10
+> %dirfiles/GET Returns object properties
+> %   VALUE = GET(OBJ,PROP_NAME) returns an object 
+> %   property.
+> %   In dirfiles, PROP_NAME can be one of the following:
+> %      'ObjectLevel'
+> %      'AnalysisLevel'
+> %
+> %   Dependencies: 
+4c12,13
+< Args = struct('ObjectLevel',0,'flags',{{'ObjectLevel'}});
+---
+> Args = struct('ObjectLevel',0, 'AnalysisLevel',0);
+> Args.flags ={'ObjectLevel','AnalysisLevel'};
+12c21,24
+<       r = 'Session';
+---
+>       r = levelConver('levelNo',1);
+> elseif(Args.AnalysisLevel)
+>       % specifies that the AnalysisLevel of the object is 'AllIntragroup'
+>       r = 'Single';
+diff -rw @dirfiles/plot.m /Users/syen/Desktop/DPV/@dirfiles/plot.m
+1c1,4
+< function obj = plot(obj,varargin)
+---
+> function [obj, varargout] = plot(obj,varargin)
+> %@dirfiles/plot Plot function for dirfiles object.
+> %   OBJ = plot(OBJ) creates a raster plot of the neuronal
+> %   response.
+3,4c6,8
+< Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b');
+< Args.flags = {'LabelsOff'};
+---
+> Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
+>                 'ReturnVars',{''}, 'ArgsOnly',0);
+> Args.flags = {'LabelsOff','ArgsOnly'};
+6a11,17
+> % if user select 'ArgsOnly', return only Args structure for an empty object
+> if Args.ArgsOnly
+>     Args = rmfield (Args, 'ArgsOnly');
+>     varargout{1} = {'Args',Args};
+>     return;
+> end
+> 
+11a23
+>       n = 1;
+13a26,29
+> % add code for plot options here
+> %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+> %
+> % @dirfiles/PLOT takes 'LabelsOff' as an example
+17a34,39
+> %
+> %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+> 
+> RR = eval('Args.ReturnVars');
+> for i=1:length(RR) RR1{i}=eval(RR{i}); end 
+> varargout = getReturnVal(Args.ReturnVars, RR1);
+diff -rw @dirfiles/plus.m /Users/syen/Desktop/DPV/@dirfiles/plus.m
+1a2,4
+> %@dirfiles/plus Overloaded plus function for dirfiles objects.
+> %   R = plus(P,Q) combines dirfiles objects P and Q and returns the
+> %   dirfiles object R.
+37a41
+> 
+Only in @nptdata: GroupedIntraPlot.m
+diff -rw @nptdata/InspectGUI.m /Users/syen/Desktop/DPV/@nptdata/InspectGUI.m
+8a9,10
+> %      multObjs - specifies that the following cell array contains
+> %                 all the objects that should be plotted.
+11a14,16
+> %      ObjectList - specifies that the following cell array contains
+> %                all the objects, together with the optional input 
+> %                arguments if any, that should be plotted.
+24,25c29,30
+< 
+< 
+---
+> % 
+> % 
+42c47
+<     'Units','normalized', ...
+---
+>     'Units','characters', ...
+44c49
+<     'Position',[0.216796875 0.01 0.134765625 0.05483028720626632], ...
+---
+>     'Position',[22.2 .2946153846153846 13.8 1.61538461538462], ...
+48c53
+<     'Units','normalized', ...
+---
+>     'Units','characters', ...
+50c55
+<     'Position',[0.642578125 0.01 0.134765625 0.05483028720626632], ...
+---
+>     'Position',[65.8 .2946153846153846 13.8 1.61538461538462], ...
+54c59
+<     'Units','normalized', ...
+---
+>     'Units','characters', ...
+56c61
+<     'Position',[0.85 0.01 0.134765625 0.05483028720626632], ...
+---
+>     'Position',[87.04000000000001 .2946153846153846 13.8 1.61538461538462], ...
+60c65
+<     'Units','normalized', ...
+---
+>     'Units','characters', ...
+62c67
+<     'Position',[0.486328125 0.01 0.115234375 0.05744125326370757], ...
+---
+>     'Position',[49.8 .2946153846153846 11.8 1.69230769230769], ...
+63a69
+>     'String', '1', ...
+66,67c72,73
+<     'Units','normalized', ...
+<     'Position',[0.359375 0.01 0.12109375 0.04438642297650131], ...
+---
+>     'Units','characters', ...
+>     'Position',[36.8 .2946153846153846 12.4 1.30769230769231], ...
+76c82,83
+<     'Position',[0.072265625 0.138 0.8828125 0.7806788511749347], ...
+---
+>     'Units','characters', ...
+>     'Position',[7.4 4.06569230769231 90.40000000000001 23], ...
+81a89,91
+> % set the CloseRequestFn
+> set(gcf,'CloseRequestFcn','InspectCB Quit');
+> 
+87,89c97
+< s.overplot=0;
+< s.linkedzoom = 0;
+< s.removexlabels=0;
+---
+> 
+91a100
+> 
+93,103c102,125
+< i = 1;
+< while(i <= num_args)
+<     if ischar(varargin{i})
+<         switch varargin{i}
+<             case('HoldAxis')
+<                 % grab value
+<                 val = varargin{i+1};
+<                 if strcmp(val,'true')
+<                     s.holdaxis = 1;
+<                 else
+<                     s.holdaxis = 0;
+---
+> 
+> s =  struct ('HoldAxis', 0, 'multObjs', {''}, 'addObjs', {''}, ...
+>             'ObjectList', {''}, 'dir', {''}, 'optArgs',{''}, ...
+>             'OverPlot', 0, 'LinkedZoom', 0, 'PopulationPlot', 0);
+> s.flags = {'HoldAxis', 'OverPlot', 'LinkedZoom', 'PopulationPlot'};
+>             
+> [s, varargin2] = getOptArgs (varargin, s, ...
+>                                'remove', {'HoldAxis', 'multObjs', 'addObjs', ...
+>                                'ObjectList', 'Groups', 'optArgs', 'dir', ...
+>                                'OverPlot', 'LinkedZoom', 'PopulationPlot'});
+>    
+> 
+> if ~isempty(s.multObjs)
+>     obj = s.multObjs;
+>     noptArgs = length(s.optArgs);
+>     nobj = length(s.multObjs);
+>     if (noptArgs~=nobj)
+>         % there should be the same number of optArgs as objects
+>         % if an object does not have arguments, an empty cell array
+>         % should still be present. Need empty cell arrays instead
+>         % of empty numerical arrays created by cell(n,m) in order for
+>         % the optional arguments to be passed on properly
+>         for i=(noptArgs+1):nobj
+>             s.optArgs{i} = {};
+105,148d126
+<                 % remove argument from varargin
+<                 [varargin,num_args] = removeargs(varargin,i,2);
+<                 i = i - 1;
+<             case('multObjs')
+<                 obj = varargin{i+1};
+<                 s.ev = event(1,get(obj{1},'Number'));
+<                 [varargin,num_args] = removeargs(varargin,i,2);
+<                 i = i - 1;
+<             case('addObjs')
+<                 % objs = varargin{i+1};
+<                 % obj = {obj{1}, objs{:}};
+<                 obj = {obj{1}, varargin{i+1}{:}};
+<                 [varargin,num_args] = removeargs(varargin,i,2);
+<                 i = i - 1;
+<             case('Groups')
+<                 s.groups = varargin{i+1};
+<                 [varargin,num_args] = removeargs(varargin,i,2);
+<                 i = i - 1;
+<             case('optArgs')
+<                 s.optargs = varargin{i+1};
+<                 [varargin,num_args] = removeargs(varargin,i,2);
+<                 i = i - 1;
+<             case('dir')
+<                 s.dir = varargin{i+1};
+<                 [varargin,num_args] = removeargs(varargin,i,2);
+<                 i = i - 1;
+<             case('OverPlot')
+<                 s.overplot = 1;% varargin{i+1};
+<                 [varargin,num_args] = removeargs(varargin,i,1);
+<                 i = i - 1;
+<             case('RemoveXLabels')
+<                 s.removexlabels = 1;% varargin{i+1};
+<                 [varargin,num_args] = removeargs(varargin,i,1);
+<                 i = i - 1;
+<             case('LinkedZoom')
+<                 s.linkedzoom = 1;
+<                 % get the next argument
+<                 if(length(varargin)>=(i+1) && varargin{i+1}==1)
+<                     [varargin,num_args] = removeargs(varargin,i,2);
+<                 elseif(length(varargin)>=(i+1) && varargin{i+1}==0)
+<                     [varargin,num_args] = removeargs(varargin,i,2);
+<                     s.linkedzoom = 0;
+<                 else
+<                     [varargin,num_args] = removeargs(varargin,i,1);
+150c128,139
+<                 i = i - 1;
+---
+> elseif ~isempty(s.addObjs)
+>     obj = {obj{1}, s.addObjs{:}};
+>     noptArgs = length(s.optArgs);
+>     nobj = length(s.addObjs) + 1;
+>     if (noptArgs~=nobj)
+>         % there should be the same number of optArgs as objects
+>         % if an object does not have arguments, an empty cell array
+>         % should still be present. Need empty cell arrays instead
+>         % of empty numerical arrays created by cell(n,m) in order for
+>         % the optional arguments to be passed on properly
+>         for i=(noptArgs+1):nobj
+>             s.optArgs{i} = {};
+152,155d140
+<         i = i + 1;
+<     else
+<         % not a character, just skip over it
+<         i = i + 1;
+156a142,145
+> elseif ~isempty(s.ObjectList)
+>     nobj = length(s.ObjectList);
+>     for i = 1:nobj
+>         obj{i} = s.ObjectList{i}{1};
+157a147,154
+>         if length(s.ObjectList{i}) >1
+>             s.optArgs{i} = s.ObjectList{i}{2};
+>         else
+>             s.optArgs{i} = {};
+>         end
+>     end
+> else
+>     s.optArgs = {varargin2};
+159d155
+< 
+165,166c161
+< % if there are multiple objects, initialize structure for number of
+< % objects
+---
+> % if there are multiple objects, get the directories
+176,201d170
+<     if ~isfield(s,'optargs')
+<         noptArgs = 0;
+<     else
+<         noptArgs = length(s.optargs);
+<     end
+<     if (noptArgs~=nobj)
+<         % there should be the same number of optArgs as objects
+<         % if an object does not have arguments, an empty cell array
+<         % should still be present. Need empty cell arrays instead
+<         % of empty numerica arrays created by cell(n,m) in order for
+<         % the optional arguments to be passed on properly
+<         for i=(noptArgs+1):nobj
+<             s.optargs{i} = {};
+<         end
+<     end
+< else
+<     if ~isfield(s,'optargs')
+<         if (num_args>0)
+<             % if there are remaining arguments, and there is only 1 object with
+<             % no optArgs, assume they are for the object
+<             s.optargs  = {{varargin{:}}};
+<         else
+<             % set optargs to empty cell array to prevent errors
+<             s.optargs = {{}};
+<         end
+<     end
+203a173
+> 
+207,258c177,178
+< s.ev = event(1,get(obj{1},'Number',s.optargs{1}{:},varargin{:}));
+< s.holdaxis = get(obj{1},'HoldAxis');
+< 
+< for ii=1:nobj
+<     cd(s.dir{ii})
+<     % subplot(nobj,1,ii)
+<     if(~s.overplot)
+<         s.subplot = nptSubplot(nobj,ii,varargin{:});
+<     end
+<     %pass optional arguments in a form that can be recognized as varargin
+<     %    try
+<     %         [s.obj{ii}, outputs] = plot(obj{ii},1,s.optargs{ii}{:});
+<     %
+<     %         Args = struct('Args',[],'handle',[],'xLimits',[]);
+<     %         s.Arg(ii) = getOptArgs(outputs,Args);
+<     %    catch
+<     s.obj{ii} = plot(obj{ii},1,s.optargs{ii}{:});
+<     s.Arg=[];
+<     %    end
+<     if(s.overplot)
+<         hold on
+<     end
+< end
+< 
+< if(s.overplot)
+<     hold off
+< end
+< 
+< if s.holdaxis
+<     ax = axis;
+<     s.lm = limits(ax(3),ax(4));
+< end
+< 
+< 
+< %set all axis to the same x range
+< h=[];
+< if(nobj>1 && ~s.overplot)
+<     for ii=1:size(s.Arg,2)
+<         if isfield(s.Arg(ii).Args,'linkedZoom') & s.Arg(ii).Args.linkedZoom==1
+<             h= [h , s.Arg(ii).handle];
+<             axes(h(1))
+<         end
+<     end
+< end
+< if(~isempty(h))
+<     linkedzoom(h,'onx')
+<     linkedzoom('out')
+<  %   linkaxes(h,'x')
+< elseif s.linkedzoom & length(findobj(h0,'Type','axes'))>1
+<     linkedzoom(h0,'onx')
+<     linkedzoom('out')
+< %    linkaxes(findobj(h0,'Type','axes'),'x')
+---
+> if s.PopulationPlot
+>     s.ev = event (1, 1);
+260c180
+<     zoom xon
+---
+>     s.ev = event(1, get(obj{1},'Number',s.optArgs{1}{:},varargin2{:}));
+262,283c182,184
+< 
+< if s.removexlabels
+<     ah = findobj(h0,'Type','Axes');
+<     ah = ah(2:end);
+<     set(ah,'XTick',[]);
+<     xh = get(ah,'XLabel');
+<     if length(xh)>1
+<         xh=cell2mat(xh);
+<     end
+<     set(xh,'String','')
+< end
+< 
+< 
+< f=fieldnames(s.obj{1});
+< if sum(strcmp(f,'title'))==1
+<     set(gcf,'Name',getfield(s.obj{1},'title'))
+< end
+< if sum(strcmp(f,'sessionname'))==1
+<     set(gcf,'Name',getfield(s.obj{1},'sessionname'))
+< end
+< 
+< 
+---
+> s.HoldAxis = get(obj{1},'HoldAxis');
+> s.obj = obj; 
+> s.subplot = [];
+285a187,188
+> 
+> InspectFn (h0, 1, varargin2{:});
+\ No newline at end of file
+Only in /Users/syen/Desktop/DPV/@nptdata: ProcessCombination.m
+Only in /Users/syen/Desktop/DPV/@nptdata: ProcessLevel.m
+diff -rw @nptdata/get.m /Users/syen/Desktop/DPV/@nptdata/get.m
+26c26,27
+<       p = 'Cluster';
+---
+>     %p = 'Cluster';
+>     p = levelConvertt('levelNo',1);
+Only in @nptdata: getChunkInfo.m
+diff -rw @nptdata/groupDirs.m /Users/syen/Desktop/DPV/@nptdata/groupDirs.m
+2c2
+< %nptdata/groupDirs Groups session directories
+---
+> %nptdata/groupDirs Groups directories
+4,6c4,12
+< %   corresponding to different grouping of the session directories.
+< %   The default grouping is 'IntraGroup', which returns the indices
+< %   corresponding to each group in each column, padded with NaN's.
+---
+> %   corresponding to different grouping of the directories.
+> %   The default grouping is 'Intra<Level>', which returns the indices
+> %   corresponding to each item in the <level> in each column, padded with NaN's.
+> % 
+> % LevelPrefix:  specifies the level name of 'Intra<Level>'. If not specified, 
+> %   the function returns the grouping in second lowest level. 
+> %   e.g.: groupDirs(obj,'Pairs','LevelPrefix','Group');
+> %         gives IntraGroup grouping, returns the indices
+> %   corresponding to each group in each column.
+18c24
+< Args = struct('Pairs',0,'NoSingles',0);
+---
+> Args = struct('Pairs',0,'NoSingles',0,'LevelPrefix','');
+21a28,34
+> if(isempty(Args.LevelPrefix))
+>     levelPrefix = levelConvertt('levelNo',1);
+> elseif(levelConvertt('levelName',Args.LevelPrefix) == 1)
+>     error('Cannot create intra-%s directories...', lower(Args.LevelPrefix))
+> else
+>     levelPrefix = levelConvertt('levelNo',(levelConvertt('levelName',Args.LevelPrefix))-1);
+> end
+24c37
+<     cellprefix = getDataDirs('CellPrefix');
+---
+>     cellprefix = getDataDirs('LevelPrefix',levelPrefix);
+64c77
+<             cellprefix = getDataDirs('CellPrefix');
+---
+>             cellprefix = getDataDirs('LevelPrefix',levelPrefix);
+diff -rw @nptdata/nptdata.m /Users/syen/Desktop/DPV/@nptdata/nptdata.m
+1c1
+< function n = nptdata(varargin)
+---
+> function [n,varargout] = nptdata(varargin)
+40c40,41
+<       'HoldAxis',0,'Auto',0,'flags',{{'Auto'}});
+---
+>       'HoldAxis',0,'Auto',0,'ArgsOnly',0);
+> Args.flags = {'Auto','ArgsOnly'};
+42a44,51
+> 
+> % if user select 'ArgsOnly', return only Args structure for an empty object
+> if Args.ArgsOnly
+>     varargout{1} = {'Args',Args};
+>     n = createEmptyObject(Args);
+>     return;
+> end
+> 
+95c104
+<               n = createEmptyObject;
+---
+>               n = createEmptyObject(Args);
+138c147
+< function obj = createEmptyObject
+---
+> function obj = createEmptyObject(Args)
+diff -rw @nptdata/plot.m /Users/syen/Desktop/DPV/@nptdata/plot.m
+1c1
+< function vw = plot(vw,varargin)
+---
+> function [vw, varargout] = plot(vw,varargin)
+29,30c29,31
+< Args = struct('Objects',{''},'SubPlots',[],'DirsSubPlots',[],'OverPlot',0);
+< Args.flags = {'OverPlot'};
+---
+> Args = struct('Objects',{''},'SubPlots',[],'DirsSubPlots',[],'OverPlot',0, 'ArgsOnly',0,'ReturnVars',{''},...
+>     'GroupPlots',1,'GroupPlotIndex',1);
+> Args.flags = {'OverPlot', 'ArgsOnly'};
+31a33,40
+> 
+> % if user select 'ArgsOnly', return only Args structure for an empty object
+> if Args.ArgsOnly
+>     Args = rmfield (Args, 'ArgsOnly');
+>     varargout{1} = {'Args',Args};
+>     return;
+> end
+> 
+55,61c64
+<       % cd(vw.sessiondirs{n})
+<       % call subsref so that the global variable nptDataDir will be checked
+<       a(1) = struct('type','.','subs','SessionDirs');
+<       % for some reason we need to use double cell arrays to make sure the 
+<       % argument will be passed on properly
+<       a(2) = struct('type','{}','subs',{{n}});
+<       cd(subsref(vw,a))
+---
+>       cd(vw.sessiondirs{n})
+85c88
+<             [oRows,oCols] = size(Args.Objects{i});
+---
+>             [oRows,oCols] = size(Args.Objects);
+89c92
+<                               thisObj = feval(Args.Objects{i}{1},'auto',Args.Objects{i}{3}{:});
+---
+>                               thisObj = feval(Args.Objects{i,1},'auto',Args.Objects{i,3}{:});
+92c95
+<                               thisObj = feval(Args.Objects{i}{1},'auto');
+---
+>                               thisObj = feval(Args.Objects{i,1},'auto');
+102c105
+<                                               plot(thisObj,Args.Objects{i}{2}{:},'GroupPlots',nobjs,'GroupPlotIndex',i);
+---
+>                                               plot(thisObj,Args.Objects{i,2}{:},'GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
+104c107
+<                                               plot(thisObj,'GroupPlots',nobjs,'GroupPlotIndex',i);
+---
+>                                               plot(thisObj,'GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
+108c111
+<                                               plot(thisObj,Args.Objects{i}{2}{:},'LabelsOff','GroupPlots',nobjs,'GroupPlotIndex',i);
+---
+>                                               plot(thisObj,Args.Objects{i,2}{:},'LabelsOff','GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
+110c113
+<                                               plot(thisObj,'LabelsOff','GroupPlots',nobjs,'GroupPlotIndex',i);
+---
+>                                               plot(thisObj,'LabelsOff','GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
+130c133
+<                               Args.Objects{i}{1});
+---
+>                               Args.Objects{i,1});
+146a150,159
+> 
+> % return the arguments that the user has specified
+> rvarl = length(Args.ReturnVars);
+> if(rvarl>0)
+>     % assign requested variables to varargout
+>     for rvi = 1:rvarl
+>         varargout{1}{rvi*2-1} = Args.ReturnVars{rvi};
+>         varargout{1}{rvi*2} = eval(Args.ReturnVars{rvi});
+>     end
+> end
+Only in /Users/syen/Desktop/DPV/@nptdata: saveObject.m
+diff -rw @nptdata/subsref.m /Users/syen/Desktop/DPV/@nptdata/subsref.m
+45a46
+>                     %odir = getDataDirs('Level','Days','DirString',bdir);
+56,58d56
+<                 % replace '\' with '/' in case the old directory was from
+<                 % Windows
+<                 b = strrep(b,'\','/');
+diff -rw @nptgroup/get.m /Users/syen/Desktop/DPV/@nptgroup/get.m
+20c20
+<     cd(obj.data.cellNames{1})
+---
+> %     cd(obj.data.cellNames{1})
+diff -rw @nptgroup/nptgroup.m /Users/syen/Desktop/DPV/@nptgroup/nptgroup.m
+1c1
+< function obj = nptgroup(varargin)
+---
+> function [obj, varargout] = nptgroup(varargin)
+12,13c12,14
+<       'GroupDirs',{''},'GroupsFile','','GetClusterDirs',0);
+< Args.flags = {'Auto','NoSingles','GetClusterDirs'};
+---
+>       'GroupDirs',{''},'GroupsFile','','GetClusterDirs',0, 'ArgsOnly',0,...
+>     'TempFlag',0);
+> Args.flags = {'Auto','NoSingles','GetClusterDirs','ArgsOnly','TempFlag'};
+23a25,31
+> % if user select 'ArgsOnly', return only Args structure for an empty object
+> if Args.ArgsOnly
+>     varargout{1} = {'Args',Args};
+>     obj = createEmptyObject(Args);
+>     return;
+> end
+> 
+74c82
+<               cellnames = getDataDirs('GetClusterDirs');
+---
+>               cellnames = getDataDirs('GetDirs');
+127c135
+<         cellnames = getDataDirs('GetClusterDirs');
+---
+>         cellnames = getDataDirs('GetDirs');
+129a138,140
+>         if(Args.TempFlag==0)
+>             ndg = ProcessLevel(nptdata,varargin{:});
+>         else
+130a142
+>         end
+diff -rw @nptgroup/plot.m /Users/syen/Desktop/DPV/@nptgroup/plot.m
+11,13c11,20
+< Args = struct('Object','','GroupEvent',0,'GroupPlotSep','');
+< [Args,varargin2] = getOptArgs(varargin,Args,'flags',{'GroupEvent'}, ...
+<     'remove',{'GroupEvent'});
+---
+> Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Object','','GroupEvent',0,'GroupPlotSep','','ReturnVars',{''}, 'ArgsOnly',0);
+> Args.flags = {'LabelsOff','GroupEvent', 'ArgsOnly'};
+> [Args,varargin2] = getOptArgs(varargin,Args, 'remove',{'GroupEvent'});
+> 
+> % if user select 'ArgsOnly', return only Args structure for an empty object
+> if Args.ArgsOnly
+>     Args = rmfield (Args, 'ArgsOnly');
+>     varargout{1} = {'Args',Args};
+>     return;
+> end
+79,80c86
+< h=zeros(numDirs,1);
+< delete(gca);   %bug in R2006b with subplot requires this.
+---
+> h=[];
+86,87c92,93
+<       h(i) = subplot('Position',axesPositions(i,:));
+<       % h = [h hc];
+---
+>       hc = subplot('Position',axesPositions(i,:));
+>       h = [h hc];
+95c101
+<               plot(thisObj,cellN,plotOptions{:},'GroupPlots',numDirs, ...
+---
+>               thisObj = plot(thisObj,cellN,plotOptions{:},'GroupPlots',numDirs, ...
+100,102c106,108
+< %     if(strcmp(version('-release'),'14'))
+< %         set(hc,'Position',axesPositions(i,:));
+< %     end
+---
+>     if(strcmp(version('-release'),'14'))
+>         set(hc,'Position',axesPositions(i,:));
+>     end
+106,108c112,114
+< % if exist('outputs','var')
+< % varargout{1} = {outputs{:},'handle',h};
+< % end
+---
+> if exist('outputs','var')
+> varargout{1} = {outputs{:},'handle',h};
+> end
+112a119,128
+> 
+> % return the arguments that the user has specified
+> rvarl = length(Args.ReturnVars);
+> if(rvarl>0)
+>     % assign requested variables to varargout
+>     for rvi = 1:rvarl
+>         varargout{1}{rvi*2-1} = Args.ReturnVars{rvi};
+>         varargout{1}{rvi*2} = eval(Args.ReturnVars{rvi});
+>     end
+> end
+diff -rw gui/InspectCB.m /Users/syen/Desktop/DPV/gui/InspectCB.m
+3c3,15
+< switch(action)
+---
+> % Contains all the callbacks of the objects on InpsectGUI GUI:
+> %   Previous - plot the previous data set and the index number specified
+> %              by 'Number' minus one.
+> %   Next - plot the next data set and the index number specified by 
+> %          'Number' plus one.
+> %   Number - plot the data set indicated by the index number which is
+> %            specified by 'Number'.
+> %   Quit - delete the figure 'PlotOptions' if any, and delete the
+> %          current figure.
+> %   Load - load a data file and create the respective data object.
+> %   PlotOptions - create a PlotOptions GUI object for the user to modify
+> %                 the plot options of the plot.
+> 
+4a17
+> switch(action)
+23c36
+<                 n = name2index(s.obj{1},sscanf(str,'s: %s'),s.optargs{1}{:});
+---
+>                 n = name2index(s.obj{1},sscanf(str,'s: %s'),s.optArgs{1}{:});
+25c38
+<                 n = name2index(s.obj{1},str,s.optargs{1}{:});
+---
+>                 n = name2index(s.obj{1},str,s.optArgs{1}{:});
+31c44,54
+<         close(gcbf)
+---
+>         s = get(gcbf, 'UserData');
+>         if isfield(s,'PlotOptions') & ishandle(s.PlotOptions)
+>             plotOptHandles = guidata(s.PlotOptions);
+>             if isfield(plotOptHandles, 'objEdit')
+>                 ObjectEditCB('Quit', plotOptHandles.objEdit);
+>                 plotOptHandles = rmfield(plotOptHandles, 'objEdit');
+>                 guidata(s.PlotOptions, plotOptHandles);
+>             end
+>             delete(s.PlotOptions);
+>         end
+>         delete(gcbf);
+39a63
+>         
+43,44c67,68
+<         if isfield('s','plotOptions') & ishandle(s.plotOptions)
+<             figure(s.plotOptions)
+---
+>         if isfield(s,'PlotOptions') & ishandle(s.PlotOptions)
+>             set(s.PlotOptions, 'Visible', 'on');
+47c71,73
+<             s.plotOptions=h;
+---
+>             s.PlotOptions=h;
+>             
+>             set(H, 'UserData', {});
+53,124c79
+< % get number of objects
+< nobj = length(s.obj);
+< delete(findobj(gcf,'Type','axes'))
+< % get original directory
+< cwd = pwd;
+< for ii=1:nobj
+<     cd(s.dir{ii})
+<     if(~s.overplot)
+<         % get subplot layout
+<         a = s.subplot;
+<         subplot(a(1),a(2),ii);
+<         % need to call subplot a second time to work around problem when 
+<         % using plotyy (see Solution Number: 1-19HLP in Mathworks's tech
+<         % solution database). This bug is supposed to be fixed in R14.
+<         subplot(a(1),a(2),ii);
+<     end
+<     %pass optional arguments in a form that can be recognized as varargin
+< %     try
+< %         [s.obj{ii}, outputs] = plot(s.obj{ii},n,s.optargs{ii}{:});
+< %         Args = struct('Args',[],'handle',[],'axisLimits',[]);
+< %         Arg(ii) = getOptArgs(outputs,Args,'remove',{'axisLimits'});
+< %     catch
+<         s.obj{ii} = plot(s.obj{ii},n,s.optargs{ii}{:});
+<         Arg=[];
+< %     end
+<     if(s.overplot)
+<         hold on
+<     end
+< end
+< % return to original directory
+< cd(cwd)
+< if(s.overplot)
+<     hold off
+< end
+< s.Arg=Arg;
+< 
+< if s.holdaxis
+<     ax = axis;
+<     [s.lm,lmin,lmax] = update(s.lm,ax(3),ax(4));
+<     axis([ax(1) ax(2) lmin lmax]);
+< end
+< 
+< h=[];
+< if(nobj>1 && ~s.overplot)
+<     for ii=1:size(s.Arg,2)
+<         if isfield(s.Arg(ii).Args,'linkedZoom') & s.Arg(ii).Args.linkedZoom==1
+<             h= [h , s.Arg(ii).handle];
+<             axes(h(1))
+<         end
+<     end
+< end
+< 
+< if s.removexlabels
+<     ah = findobj(gcbf,'Type','Axes');
+<     ah = ah(2:end);
+<     set(ah,'XTick',[]);
+<     xh = get(ah,'XLabel'); 
+<     if length(xh)>1
+<         xh=cell2mat(xh);
+<     end
+<     set(xh,'String','')
+< end
+< 
+< if s.linkedzoom & length(findobj(gcbf,'Type','axes'))>1
+<     linkedzoom(gcbf,'onx')
+<     linkedzoom('out')
+< elseif(~isempty(h))
+<     linkedzoom(h,'onx');
+<     linkedzoom('out');
+< else
+<     zoom xon
+< end
+---
+> InspectFn (gcbf, n);
+127c82,84
+< set(edithandle,'String',num2str(n))
+---
+> set(edithandle,'String',num2str(n));
+> 
+> set(gcbf, 'UserData', {});
+Only in gui: InspectCB2.m
+diff -rw gui/InspectFn.m /Users/syen/Desktop/DPV/gui/InspectFn.m
+2a3,15
+> % This function should not be accessed by the user.
+> %
+> % This function is called by other functions or GUIs,
+> %   e.g. nptdata/InpsectGUI and updatebutton_Callback function for 
+> %   PlotOptions GUI, to call the plot function to do plotting,
+> %   and modify the properties of the plot, such as 'OverPlot', 'HoldAxis'
+> %   and 'LinkedZoom'.
+> %
+> % The first input argument is the handle of the parent figure;
+> % The second input argument is the eventnumber
+> % The rest optional input arguments depends on the calling function
+> 
+> 
+25d37
+<     %try
+26a39
+>             try
+27a41,44
+>             catch
+>                 display(['Error: please add the argument ''ReturnVars'' to the ' ...
+>                          'respective plot function! Refer to @dirfiles/PLOT.']);
+>             end 
+30a48
+>             try
+31a50,53
+>             catch
+>                 display(['Error: please add the argument ''ReturnVars'' to the ' ...
+>                          'respective plot function! Refer to @dirfiles/PLOT.']);
+>             end
+36,39c58
+<     %catch
+< %         s.obj{ii} = plot(s.obj{ii},n,s.optArgs{ii}{:});
+< %         s.Arg=[];
+< %     end
+---
+> 
+Only in /Users/syen/Desktop/DPV/gui: ObjectCB.m
+Only in /Users/syen/Desktop/DPV/gui: ObjectEditCB.m
+Only in /Users/syen/Desktop/DPV/gui: ObjectGUI.fig
+Only in /Users/syen/Desktop/DPV/gui: ObjectGUI.m
+diff -rw gui/PlotOptions.m /Users/syen/Desktop/DPV/gui/PlotOptions.m
+30,32d29
+< if varargin{1} == 1
+<     gui_Singleton = 1;
+< else
+34c31
+< end
+---
+> 
+70c67
+< width = 90.0;
+---
+> wid = 90.0;
+101a99,100
+>     pud.Arg(ii).Args.flags = flagsCollect{ii}{:};
+>     
+108,109c107
+< vert = vert - .05;
+< vert = vert - .05;
+---
+> vert = vert - .3;
+112c110
+<     set (gcf, 'Position', [103.80000000000001 15.153846153846207 width height]);
+---
+>     set (hObject, 'Position', [103.80000000000001 15.153846153846207 wid height]);
+126,127c124,125
+<     ht{ii} = uicontrol('Parent',gcf,'Units','characters', ...
+<                        'Position',[0 vert*height 0.2*width .027*height*sizeRatio], ...
+---
+>     ht{ii} = uicontrol('Parent',hObject,'Units','characters', ...
+>                        'Position',[0 vert*height 0.2*wid .027*height*sizeRatio], ...
+131,162c129,130
+<     vert = vert - .05*sizeRatio;
+<     vert1 = vert;
+<     vert2 = vert;
+<     
+<     %box
+<     %title
+<     flags = flagsCollect{ii};
+< 
+<     optionNames = fieldnames(pud.Arg(ii).Args);
+<     numOptions = size(optionNames,1);
+<     
+<     for jj = 1:numOptions
+<         hf{ii}{jj} = [];
+<         ho{ii}{jj} = [];
+<         hv{ii}{jj} = [];
+<         
+<         %optionName
+<         value = eval(['pud.Arg(ii).Args.' optionNames{jj}]);
+<         if sum(strcmp(optionNames(jj),flags{:})) 
+<             %flag
+<             hf{ii}{jj} = uicontrol('Parent',gcf,'Units','characters', ...
+<                                    'Position',[.03*width vert1*height .35*width .025*height*sizeRatio], ...
+<                                    'FontUnits','normalized','FontSize',.8, ...
+<                                    'FontWeight','normal', ...
+<                                    'String',optionNames(jj), ...
+<                                    'Style','checkbox','Value',value);
+<             vert1 = vert1 - .04*sizeRatio;
+<         else
+<             testNum = 'c';
+<             if isnumeric(value)
+<                 value = num2str(value);
+<                 testNum = 'n';
+---
+>     if vert < 0
+>         set(ht{ii}, 'Visible', 'off');
+164,174d131
+<             %value
+<             ho{ii}{jj} = uicontrol('Parent',gcf,'Units','characters', ...
+<                                    'Position',[.37*width vert2*height .3*width .025*height*sizeRatio], ...
+<                                    'FontUnits','normalized','FontSize',.83, ...
+<                                    'FontWeight','normal', ...
+<                                    'String',optionNames(jj),'Style','text');
+<             hv{ii}{jj} = uicontrol('Parent', gcf,'Units','characters', ...
+<                                    'Position',[.68*width vert2*height .25*width .0285*height*sizeRatio], ...
+<                                    'FontUnits','normalized','FontSize',.83, ...
+<                                    'FontWeight','normal', ...
+<                                    'String',value,'Style','edit', 'Tag', testNum);
+176c133
+<             vert2 = vert2 - .04*sizeRatio;
+---
+>     [vert, handlesCollect{ii}] = optionsGUI (hObject, pud.Arg(ii).Args, sizeRatio, vert);
+179,195d135
+<     end
+<     
+<     if vert1>vert2
+<         vert = vert2;
+<     else
+<         vert = vert1;
+<     end
+< end
+< 
+< % create a checkbox for PopulationPlot option
+< vert = vert - .05*sizeRatio;
+< hff = uicontrol('Parent',gcf,'Units','characters', ...
+<                 'Position',[.03*width vert*height .35*width .025*height*sizeRatio], ...
+<                 'FontUnits','normalized','FontSize',.8, ...
+<                 'FontWeight','normal', ...
+<                 'String','PopulationPlot', ...
+<                 'Style','checkbox', 'Value',pud.PopulationPlot);
+198a139
+> handlesPos = {};
+200,201c141,143
+<     for jj = 1:numOptions
+<         handlesData = [handlesData, hf{ii}{jj}, ho{ii}{jj}, hv{ii}{jj}];
+---
+>     handlesData = [handlesData, ht{ii}, handlesCollect{ii}{1}];
+>     temp = handlesCollect{ii}{2};
+>     handlesPos = {handlesPos{:} get(ht{ii}, 'Position') temp{:}};
+202a145,155
+> handlesCollect = {handlesData, handlesPos};
+> 
+> % create a title for InspectGUI options
+> vert = vert - .05*sizeRatio;
+> hff = uicontrol ('Parent', hObject, 'Units', 'characters', ...
+>                  'Position',[0 vert*height .35*wid .027*height*sizeRatio], ...
+>                  'FontUnits','normalized','FontSize',.9, ...
+>                  'FontWeight','bold', ...
+>                  'Style', 'text', 'String','InspectGUI Options:');
+> if vert < 0
+>     set (hff, 'Visible', 'off');
+204c157,163
+< handlesData = [handlesData, hff];
+---
+> 
+> % plot InspectGUI options on the GUI
+> vert = vert - .05*sizeRatio;
+> InspectOpt = struct('PopulationPlot',pud.PopulationPlot, 'LinkedZoom',pud.LinkedZoom, ...
+>                     'OverPlot',pud.OverPlot, 'SubPlot',pud.subplot);
+> InspectOpt.flags = {'PopulationPlot', 'LinkedZoom', 'OverPlot'};
+> [vert, InspectHandles] = optionsGUI (hObject, InspectOpt, sizeRatio, vert);
+211,212c170,171
+< h_push = uicontrol('Parent',gcf, 'Units','characters', ...
+<                    'Position',[.75*width vert*height .15*width .04*height*sizeRatio], ...
+---
+> h_push = uicontrol('Parent',hObject, 'Units','characters', ...
+>                    'Position',[.75*wid vert*height .15*wid .04*height*sizeRatio], ...
+216,229c175,176
+<                    
+<                   
+< % edit the callback command of slider
+< clbk = '';
+< for ii = 1:numObjects
+<     temPos = get(ht{ii}, 'Position');
+<     line = ['set(', num2str(ht{ii}, '%.13f'), ', ''Position'', [', ...
+<             '0 ', num2str(temPos(2)),'-get(gcbo, ''value'') ', ...
+<             '.2*', num2str(width), ' ', ...
+<             '.027*', num2str(height), '*', num2str(sizeRatio), '])'];
+<     if ii ~= numOptions
+<         clbk = [clbk, line, ', '];
+<     else
+<         clbk = [clbk, line];
+---
+> if vert < 0
+>     set (h_push, 'Visible', 'off');
+232,259c179,184
+<     for jj = 1:numOptions
+<         if ~isempty(hf{ii}{jj})
+<             temPos = get(hf{ii}{jj}, 'Position');
+<             line = ['set(', num2str(hf{ii}{jj}, '%.13f'), ', ''Position'', [', ...
+<                     '.03*', num2str(width), ' ', ...
+<                     num2str(temPos(2)),'-get(gcbo, ''value'') ', ...
+<                     '.31*', num2str(width), ' ', ...
+<                     '.025*', num2str(height), '*', num2str(sizeRatio), '])'];
+<             clbk = [clbk, line, ', '];
+<         end
+<         
+<         if ~isempty(ho{ii}{jj})
+<             temPos = get(ho{ii}{jj}, 'Position');
+<             line = ['set(', num2str(ho{ii}{jj}, '%.13f'), ', ''Position'', [', ...
+<                     '.33*', num2str(width), ' ', ...
+<                     num2str(temPos(2)),'-get(gcbo, ''value'') ', ...
+<                     '.29*', num2str(width), ...
+<                     ' .025*', num2str(height), '*', num2str(sizeRatio), '])'];
+<             clbk = [clbk, line, ', '];
+<             temPos = get(hv{ii}{jj}, 'Position');
+<             line = ['set(', num2str(hv{ii}{jj}, '%.13f'), ', ''Position'', [', ...
+<                     '.63*', num2str(width), ' ', ...
+<                     num2str(temPos(2)),'-get(gcbo, ''value'') ', ...
+<                     '.3*', num2str(width), ...
+<                     ' .0285*', num2str(height), '*', num2str(sizeRatio), '])'];
+<             clbk = [clbk, line, ', '];
+<         end
+<     end
+---
+> % update the PlotOptions UserData
+> handlesCollect{1} = [handlesCollect{1} hff InspectHandles{1} h_push];
+> handlesCollect{2} = {handlesCollect{2}{:}, get(hff, 'Position'), InspectHandles{2}{:}};
+> lenHC = length(handlesCollect{2});
+> for ii = (lenHC+1):length(handlesCollect{1})
+>     handlesCollect{2}{ii} = get(handlesCollect{1}(ii), 'Position');
+260a186,187
+> set(hObject, 'UserData', {});
+> set(hObject, 'UserData', handlesCollect);
+262,276d188
+< temPos = get(hff, 'Position');
+< line = ['set(', num2str(hff, '%.13f'), ', ''Position'', [', ...
+<         '.03*', num2str(width), ' ', ...
+<         num2str(temPos(2)), '-get(gcbo, ''value'') ', ...
+<         '.31*', num2str(width), ...
+<         ' .025*', num2str(height), '*', num2str(sizeRatio), '])'];
+< clbk = [clbk, line, ', '];
+<     
+< temPos = get(h_push, 'Position');
+< line = ['set(', num2str(h_push, '%.13f'), ', ''Position'', [', ...
+<         '.75*', num2str(width), ' ', ...
+<         num2str(temPos(2)), '-get(gcbo, ''value'') ', ...
+<         '.15*', num2str(width), ...
+<         ' .04*', num2str(height), '*', num2str(sizeRatio), '])'];
+< clbk = [clbk, line];
+280c192
+<     sldrPos = [.95*width, 0, .05*width, height];
+---
+>     sldrPos = [.95*wid, 0, .05*wid, height];
+283,284c195,196
+<     h_sldr = uicontrol ('Parent',gcf, 'Style','slider', 'Units','characters', ...
+<                         'Callback', clbk, ...
+---
+>     h_sldr = uicontrol ('Parent',hObject, 'Style','slider', 'Units','characters', ...
+>                         'Callback', ['sldrCB (', num2str(hObject, '%.13f'), ')'], ...
+286c198
+<                         'SliderStep',[0.1 0.5], 'Value',0);
+---
+>                         'SliderStep',[0.1 0.5], 'Value',0, 'Tag','sldr');
+296,297d207
+< % save the handlesData on gcf
+< set (gcf, 'UserData', handlesData);
+Only in /Users/syen/Desktop/DPV/gui: cell2str.m
+Only in /Users/syen/Desktop/DPV/gui: objectEdit.fig
+Only in /Users/syen/Desktop/DPV/gui: objectEdit.m
+Only in gui: old
+Only in /Users/syen/Desktop/DPV/gui: optionsGUI.m
+Only in /Users/syen/Desktop/DPV/gui: sldrCB.m
+diff -rw gui/updatebutton_Callback.m /Users/syen/Desktop/DPV/gui/updatebutton_Callback.m
+1c1
+< % --- Execute callback function for Update pushbutton
+---
+> % --- Execute callback function for Update pushbutton on PlotOptions GUI
+8,11c8,30
+< numObjects = size(pud.obj,2);
+< numHandles = size(handles, 2);
+< hff = handles(numHandles);
+< numHandles = numHandles - 1;
+---
+> handles = handles{1};
+> numObjects = length(pud.obj);
+> numHandles = length(handles);
+> hpp = handles(numHandles - 5);
+> hlz = handles(numHandles - 4);
+> hop = handles(numHandles - 3);
+> hsp = handles(numHandles - 2);
+> hspval = handles(numHandles - 1);
+> numHandles = numHandles - 7;
+> handles = handles(1:numHandles);
+> 
+> % devide the handles to respective objects
+> objInd = 1;
+> for ii = 1:length(handles)
+>     if strcmp(get(handles(ii), 'String'), ['Object ', num2str(objInd), ':'])
+>         numOptions(objInd) = 0;
+>     elseif strcmp(get(handles(ii), 'String'), ['Object ', num2str(objInd+1), ':'])
+>         objInd = objInd + 1;
+>         numOptions(objInd) = 0;
+>     else
+>         numOptions(objInd) = numOptions(objInd) + 1;
+>     end
+> end
+13d31
+< % devide the handles into numObjects of objects
+15,16c33,38
+<     for jj = (numHandles/numObjects)*(ii-1)+1 : (numHandles/numObjects)*ii
+<         h_Obj{ii}{jj - (ii-1)*numHandles/numObjects} = handles(jj);
+---
+>     for jj = 1:numOptions(ii)
+>         if ii < 2
+>             h_Obj{ii}{jj} = handles(jj+1);
+>         else
+>             h_Obj{ii}{jj} = handles(jj+ii+sum(numOptions(1:(ii-1))));
+>         end
+29c51
+<                 argObj{ii}{numArgs(ii)} = temCell2Str{1};
+---
+>                 argObj{ii}{numArgs(ii)} = temCell2Str;
+32a55
+>             if strcmp(get(h_Obj{ii}{2}, 'Style'), 'edit')
+36c59
+<                 argObj{ii}{numArgs(ii)} = temCell2Str{1};
+---
+>                     argObj{ii}{numArgs(ii)} = temCell2Str;
+37a61,63
+>                     if sum(strcmp(temCell2Str, {'Objects','Object'}))
+>                         argObj{ii}{numArgs(ii)} = eval(get(h_Obj{ii}{2},'String'));
+>                     else
+43a70
+>                 end
+44a72,76
+>             else
+>                 h_Obj{ii} = removeargs(h_Obj{ii}, 1, 1);
+>             end
+>         elseif strcmp(get(h_Obj{ii}{1}, 'Style'), 'pushbutton')
+>             h_Obj{ii} = removeargs(h_Obj{ii}, 1, 1);
+50a83
+> pud.optArgs = [];
+58c91
+< pud.PopulationPlot =  get(hff, 'Value');
+---
+> pud.PopulationPlot =  get(hpp, 'Value');
+63a97,99
+>     h1 = findobj(ph, 'Tag', 'EditText1');
+>     currentNum = str2num(get(h1, 'String'));
+>     pud.ev = SetEventNumber(pud.ev, currentNum);
+65a102,110
+> % update the value of pud.LinkedZoom
+> pud.LinkedZoom = get(hlz, 'Value');
+> 
+> % update the value of pud.OverPlot
+> pud.OverPlot = get(hop, 'Value');
+> 
+> % update the value of pud.SubPlot
+> pud.subplot = str2num(get(hspval, 'String'));
+>     
+Only in /Users/syen/Desktop/DPV/miscellaneous: checkArguments.m
+Only in /Users/syen/Desktop/DPV/miscellaneous: checkObjCreate.m
+Only in /Users/syen/Desktop/DPV/miscellaneous: checkcell.m
+diff -rw miscellaneous/getDataDirs.m /Users/syen/Desktop/DPV/miscellaneous/getDataDirs.m
+60c60
+< Args = struct('Group',0,'Sort',0,'HighPass',0,'Eye',0, ...
+---
+> Args = struct('Level','','Group',0,'Sort',0,'HighPass',0,'Eye',0, ...
+62c62
+<       'Relative',0,'CellPrefix',0,'GroupPrefix',0,'ComboPrefix',0, ...
+---
+>     'LevelPrefix','','CellPrefix',0,'GroupPrefix',0,...
+64c64,65
+<       'ShortName',0,'CDNow',0,'GetClusterDirs',0,'DirString','');
+---
+>     'ComboPrefix',0,'GetDirs',0,'GetClusterDirs',0,...
+>     'Relative',0,'ShortName',0,'CDNow',0,'DirString','','GetPathUpto','');
+68c69
+<       'CDNow','GetClusterDirs','ShortName'};
+---
+>       'CDNow','GetDirs','GetClusterDirs','ShortName'};
+73a75,110
+> % *************************************************************************
+> % Default level information
+> nptDataDir = '';
+> levelName = lower({'Cluster','Group','Session','Site','Day','Days'});
+> levelAbbrs = 'cgns';
+> namePattern = {'cluster00s','group0000','session00','site00'};
+> levelEqualName = {'Group/Sort/HighPass/Eye/EyeFilt/Lfp'};
+> 
+> cwd = pwd;
+> if(exist(prefdir,'dir')==7)
+>     % The preference directory exists
+>     cd(prefdir)
+>     % Check if the user created configuration file is saved in prefdir
+>     if(ispresent('configuration.txt','file'))
+>         % Read Configuration.txt file for level information
+>         content = textread('configuration.txt','%s');
+>     end
+> end
+> cd(cwd)
+> index = find(cell2array(strfind(content,'*'))==1);
+> % Assign information to variables
+> if(index(1)==1)
+>     nptDataDir = '';
+> else
+>     nptDataDir = content{1};
+> end
+> levelName = lower(content(index(1)+1:index(2)-1));
+> if(index(2)+1== index(3))
+>     levelAbbrs = '';
+> else
+>     levelAbbrs = content{index(2)+1};
+> end
+> namePattern = content(index(3)+1:index(4)-1);
+> levelEqualName = content(index(4)+1:index(5)-1);
+> %**************************************************************************
+> 
+75,99d111
+< CLUSTERLEVEL = -2;
+< GROUPLEVEL = -1;
+< SORTLEVEL = -1;
+< HIGHPASSLEVEL = -1;
+< EYELEVEL = -1;
+< EYEFILTLEVEL = -1;
+< LFPLEVEL = -1;
+< SESSIONLEVEL = 0;
+< SITELEVEL = 1;
+< DAYLEVEL = 2;
+< DAYSLEVEL = 3;
+< 
+< % names for other directories
+< daysDName = 'days';
+< dayDName = 'day';
+< siteDName = 'site';
+< sessionDName = 'session';
+< sortDName = 'sort';
+< highpassDName = 'highpass';
+< eyeDName = 'eye';
+< eyefiltDName = 'eyefilt';
+< lfpDName = 'lfp';
+< groupDName = 'group';
+< groupDName2 = 'group00';
+< clusterDName = 'cluster';
+101c113
+< 
+---
+> levell = length(levelName);
+105,125d116
+< 
+< %dir type and level relative to session directory.
+< levels = { clusterDName CLUSTERLEVEL; ...
+<                       groupDName GROUPLEVEL; ...
+<                       sortDName SORTLEVEL; ...
+<                       highpassDName HIGHPASSLEVEL; ...
+<                       eyeDName EYELEVEL; ...
+<                       eyefiltDName EYEFILTLEVEL; ...
+<                       lfpDName LFPLEVEL; ...
+<                       sessionDName SESSIONLEVEL; ...
+<                       siteDName SITELEVEL; ...
+<                       dayDName DAYLEVEL; ...
+<                       daysDName DAYSLEVEL};
+< 
+< % abbreviations for other directories
+< siteAbbr = 's';
+< sessionAbbr = 'n';
+< groupAbbr = 'g';
+< clusterAbbr = 'c';
+< 
+< % define constants
+127,128c118,123
+< % beginning of the days directory (i.e. data directory)
+< nfilesep = 4;
+---
+> % beginning of the highest level directory (i.e. data directory)
+> nfilesep = length(levelName)-2;
+> for i = levell:-1:1
+>     levels{i,1} = levelName{i};
+>     levels{i,2} = i;
+> end
+138a134,175
+> if(Args.Group)
+>     if(levelConvert('LevelName','Group'))
+>         Args.Level = 'Group';
+>     end
+> elseif(Args.Sort)
+>     if(levelConvert('LevelName','Group'))
+>         Args.Level = 'Sort';
+>     end
+> elseif(Args.HighPass)
+>     if(levelConvert('LevelName','Group'))
+>         Args.Level = 'HighPass';
+>     end
+> elseif(Args.Eye)
+>     if(levelConvert('LevelName','Group'))
+>         Args.Level = 'Eye';
+>     end
+> elseif(Args.EyeFilt)
+>     if(levelConvert('LevelName','Group'))
+>         Args.Level = 'EyeFilt';
+>     end
+> elseif(Args.Lfp)
+>     if(levelConvert('LevelName','Group'))
+>         Args.Level = 'Lfp';
+>     end
+> elseif(Args.Session)
+>     if(levelConvert('LevelName','Session'))
+>         Args.Level = 'Session';
+>     end
+> elseif(Args.Site)
+>     if(levelConvert('LevelName','Site'))
+>         Args.Level = 'Site';
+>     end
+> elseif(Args.Day)
+>     if(levelConvert('LevelName','Day'))
+>         Args.Level = 'Day';
+>     end
+> elseif(Args.Days)
+>     if(levelConvert('LevelName','Days'))
+>         Args.Level = 'Days';
+>     end
+> end
+> 
+140,141c177,179
+<       p = clusterDName;
+<       return
+---
+>     if(levelConvert('LevelName','Cluster'))
+>         Args.LevelPrefix = 'cluster';
+>     end
+143,147c181,183
+<       p = groupDName;
+<       return
+< elseif(Args.ComboPrefix)
+<       p = comboDName;
+<       return
+---
+>     if(levelConvert('LevelName','Group'))
+>         Args.LevelPrefix = 'group';
+>     end
+149,150c185,187
+<       p = sessionDName;
+<       return
+---
+>     if(levelConvert('LevelName','Session'))
+>         Args.LevelPrefix = 'session';
+>     end
+152c189,206
+<       p = siteDName;
+---
+>     if(levelConvert('LevelName','Site'))
+>         Args.LevelPrefix = 'site';
+>     end
+> elseif(Args.DayPrefix)
+>     if(levelConvert('LevelName','Day'))
+>         Args.LevelPrefix = 'day';
+>     end
+> elseif(Args.DaysPrefix)
+>     if(levelConvert('LevelName','Days'))
+>         Args.LevelPrefix = 'days';
+>     end
+> end
+>     
+>     
+>     
+>     
+> if(Args.ComboPrefix)
+>       p = comboDName;
+154,155c208,209
+< elseif(Args.DayPrefix || Args.DaysPrefix)
+<       p = '';
+---
+> elseif(~isempty(Args.LevelPrefix))
+>     p = lower(Args.LevelPrefix);
+162,163d215
+<       % replace Windows file separator character if present so objects saved 
+<       % on Windows machines will work elsewhere
+170c222
+<     fi = strfind(destLevel,fschar);
+---
+>     %fi = strfind(destLevel,fschar);
+174c226,228
+<     dname = destLevel( (fi(end-nfilesep)+1):end );
+---
+>     %dname = destLevel( (fi(end-nfilesep)+1):end );
+>     dname = strrep(destLevel,[nptDataDir '/'],'');
+>     p = [];
+177,193c231,304
+<         % use this form instead of just calling
+<         % strread(dname,'whitespace','/') so we don't have to remove each
+<         % of the prefixes
+<               [animal,site,session,group,cluster] = strread(dname, ...
+<                       [searchstr siteDName searchstr sessionDName searchstr groupDName2 searchstr clusterDName '%s']);
+<               % break up cluster into a number and the character indicating whether 
+<               % it is sua or mua
+<               clusterstr = cluster{1};
+<               % get length of clusterstr
+<               cll = length(clusterstr);
+<               clustern = str2num(clusterstr(1:(cll-1)));
+<               clusteru = clusterstr(cll);
+<               p = [animal{1} siteAbbr num2str(str2num(site{1})) sessionAbbr num2str(str2num(session{1})) groupAbbr num2str(str2num(group{1})) clusterAbbr num2str(clustern) clusteru];
+<     else
+<         [animal,site,session,combo] = strread(dname, ...
+<             [searchstr siteDName searchstr sessionDName searchstr [comboDName fschar] '%s']);
+<               p = [animal{1} siteAbbr num2str(str2num(site{1})) sessionAbbr num2str(str2num(session{1})) combo{1}];
+---
+>         for k = 1:(levell-1)
+>             [token, dname] = strtok(dname,'/');
+>             a{k} = token;
+>         end
+>         for kk = 1:(levell-1)
+>             astr = a{kk};
+>             astrnumber = str2num(astr(find(astr(:) >= 48 & astr(:) <= 57)));
+>             if(isempty(astrnumber))
+>                 p = [p astr];
+>             else
+>                 % Named with digits <><digits>
+>                 if(strcmpi(astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1),levelName(levell-kk)))
+>                     if(length(levelAbbrs)>=levelConvert('levelName',levelName{levell-kk}))
+>                         Abbr = levelAbbrs(levelConvert('levelName',levelName{levell-kk}));
+>                     else
+>                         Abbr = [];
+>                     end
+>                     % With level Abbr
+>                     if(~isempty(Abbr))
+>                         p = [p Abbr num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
+>                     else % Without level abbr
+>                         p = [p astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1) num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
+>                     end
+>                 else % Named without digits
+>                     p = [p astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1) num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
+>                 end
+>                 if(isempty(str2num(astr(end))))
+>                     p = [p astr(end)];
+>                 else
+>                     p = p;
+>                 end
+>             end
+>         end
+>     else
+>         k = 1;
+>         [token, dname] = strtok(dname,'/');
+>         while(~isempty(token))
+>             a{k} = token;
+>             [token, dname] = strtok(dname,'/');
+>             k = k+1;
+>         end
+>         for kk = 1:length(a)
+>             astr = a{kk};
+>             if(~strcmp(astr,comboDName))
+>                 astrnumber = str2num(astr(find(astr(:) >= 48 & astr(:) <= 57)));
+>                 if(isempty(astrnumber))
+>                     p = [p astr];
+>                 else
+>                     if(strcmpi(astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1),levelName(levell-kk)))
+>                         if(length(levelAbbrs)>=levelConvert('levelName',levelName{levell-kk}))
+>                             Abbr = levelAbbrs(levelConvert('levelName',levelName{levell-kk}));
+>                         else
+>                             Abbr = [];
+>                         end
+>                         % With level Abbr
+>                         if(~isempty(Abbr))
+>                             p = [p Abbr num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
+>                         else % Without level abbr
+>                             p = [p astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1) num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
+>                         end    
+>                     else
+>                         p = [p astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1) num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
+>                     end
+>                     if(isempty(str2num(astr(end))))
+>                         p = [p astr(end)];
+>                     else
+>                         p = p;
+>                     end
+>                 end
+>             else
+>                 p = [p a{kk+1}];
+>                 return
+>             end
+>         end
+196c307
+< elseif(Args.GetClusterDirs)
+---
+> elseif(Args.GetDirs | Args.GetClusterDirs)
+200,201d310
+<       % replace Windows file separator character if present so objects saved 
+<       % on Windows machines will work elsewhere
+206a316
+>     pwDir1 = strrep(pwDir,[nptDataDir '/'],'');
+208c318
+<       a = strread(pwDir,'%s ','whitespace',fschar);
+---
+>       a = strread(pwDir1,'%s ','whitespace',fschar);
+213,215c323,329
+<               % try to parse last field to get group and cluster names
+<               [g,gl] = sscanf(a{al},[groupAbbr '%d' clusterAbbr '%d%c']);
+<               % divide length of g by 3 to figure out how many cluster directories
+---
+>         unitAbbr = levelAbbrs(levell-al+1);
+>         elementAbbr = levelAbbrs(levell-al);
+>         if(a{al}(1)==unitAbbr)
+>             % try to parse last field to get unit and element names
+>             if(isempty(str2num(a{al}(end)))) % element end with char
+>                 [g,gl] = sscanf(a{al},[unitAbbr '%d' elementAbbr '%d%c']);
+>                 % divide length of g by 3 to figure out how many element directories
+217c331,352
+<               clusterDs = gl/3;
+---
+>                 elementDs = gl/3;
+>                 if(strfind(num2str(elementDs),'.'))
+>                     [g,gl] = sscanf(a{al},[unitAbbr '%d%c' elementAbbr '%d%c']);
+>                     % divide length of g by 4 to figure out how many element directories
+>                     % there are
+>                     elementDs = gl/4;
+>                     % reshape g
+>                     gr = reshape(g,4,elementDs);
+>                 else
+>                     % reshape g
+>                     gr = reshape(g,3,elementDs);
+>                 end
+>             else % element end with digit
+>                 [g,gl] = sscanf(a{al},[unitAbbr '%d' elementAbbr '%d']);
+>                 % divide length of g by 2 to figure out how many element directories
+>                 % there are
+>                 elementDs = gl/2;
+>                 if(strfind(num2str(elementDs),'.'))
+>                     [g,gl] = sscanf(a{al},[unitAbbr '%d%c' elementAbbr '%d']);
+>                     % divide length of g by 3 to figure out how many element directories
+>                     % there are
+>                     elementDs = gl/3;
+219c354,359
+<               gr = reshape(g,3,clusterDs);
+---
+>                     gr = reshape(g,3,elementDs);
+>                 else
+>                     % reshape g
+>                     gr = reshape(g,2,elementDs);
+>                 end
+>             end
+221c361
+<               p1 = cell(1,clusterDs);
+---
+>             p1 = cell(1,elementDs);
+223,224c363,382
+<               for idx = 1:clusterDs
+<                       p1{idx} = sprintf(['%s' groupDName '%04d/' clusterDName '%02d%c'], ...
+---
+>             unitDName = levelName{levell-al+1};
+>             elementDName = levelName{levell-al};
+>             unitstr = strrep(namePattern{find(cell2array(strfind(namePattern,unitDName))==1)},unitDName,'');
+>             if(isempty(str2num(unitstr(end)))) % end with char
+>                 unitNo = length(unitstr) - 1;
+>                 unitendchar = '%c';
+>             else
+>                 unitNo = length(unitstr);
+>                 unitendchar = '';
+>             end
+>             elementstr = strrep(namePattern{find(cell2array(strfind(namePattern,elementDName))==1)},elementDName,'');
+>             if(isempty(str2num(elementstr(end)))) % end with char
+>                 elementNo = length(elementstr) - 1;
+>                 elementendchar = '%c';
+>             else
+>                 elementNo = length(elementstr);            
+>                 elementendchar = '';
+>             end
+>             for idx = 1:elementDs
+>                 p1{idx} = sprintf(['%s' unitDName ['%0' num2str(unitNo) 'd' unitendchar '/'] elementDName ['%0' num2str(elementNo) 'd' elementendchar]], ...
+227a386,505
+>         elseif(a{al}(1)=='a');
+>             % try to parse last field to get unit and element names
+>             if(isempty(str2num(a{al}(end)))) % element end with char
+>                 [g,gl] = sscanf(a{al},['a' unitAbbr '%d' elementAbbr '%d%c']);
+>                 % divide length of g by 3 to figure out how many element directories
+>                 % there are
+>                 elementDs = gl/3;
+>                 if(strfind(num2str(elementDs),'.'))
+>                     [g,gl] = sscanf(a{al},['a' unitAbbr '%d%c' elementAbbr '%d%c']);
+>                     % divide length of g by 4 to figure out how many element directories
+>                     % there are
+>                     elementDs = gl/4;
+>                     % reshape g
+>                     gr = reshape(g,4,elementDs);
+>                 else
+>                     % reshape g
+>                     gr = reshape(g,3,elementDs);
+>                 end
+>             else % element end with digit
+>                 [g,gl] = sscanf(a{al},['a' unitAbbr '%d' elementAbbr '%d']);
+>                 % divide length of g by 2 to figure out how many element directories
+>                 % there are
+>                 elementDs = gl/2;
+>                 if(strfind(num2str(elementDs),'.'))
+>                     [g,gl] = sscanf(a{al},['a' unitAbbr '%d%c' elementAbbr '%d']);
+>                     % divide length of g by 3 to figure out how many element directories
+>                     % there are
+>                     elementDs = gl/3;
+>                     % reshape g
+>                     gr = reshape(g,3,elementDs);
+>                 else
+>                     % reshape g
+>                     gr = reshape(g,2,elementDs);
+>                 end
+>             end
+>             % pre-allocate memory
+>             p1 = cell(1,elementDs);
+>             prefix = pwDir(1:fi(end-1));
+>             unitDName = levelName{levell-al+1};
+>             elementDName = levelName{levell-al};
+>             unitstr = strrep(namePattern{find(cell2array(strfind(namePattern,unitDName))==1)},unitDName,'');
+>             if(isempty(str2num(unitstr(end)))) % end with char
+>                 unitNo = length(unitstr) - 1;
+>                 unitendchar = '%c';
+>             else
+>                 unitNo = length(unitstr);
+>                 unitendchar = '';
+>             end
+>             elementstr = strrep(namePattern{find(cell2array(strfind(namePattern,elementDName))==1)},elementDName,'');
+>             if(isempty(str2num(elementstr(end)))) % end with char
+>                 elementNo = length(elementstr) - 1;
+>                 elementendchar = '%c';
+>             else
+>                 elementNo = length(elementstr);            
+>                 elementendchar = '';
+>             end
+>             for idx = 1:elementDs
+>                 p1{idx} = sprintf(['%s' unitDName ['%0' num2str(unitNo) 'd' unitendchar '/'] elementDName ['%0' num2str(elementNo) 'd' elementendchar]], ...
+>                     prefix,gr(:,idx));
+>             end
+>             p = {p1{:}};
+>         elseif(a{al}(1)=='p')
+>             % try to parse last field to get unit and element names
+>             if(isempty(str2num(a{al}(end)))) % element end with char
+>                 [g,gl] = sscanf(a{al},['p' unitAbbr '%d' elementAbbr '%d%c' unitAbbr '%d' elementAbbr '%d%c']);
+>                 % divide length of g by 6 to figure out how many element directories
+>                 % there are
+>                 elementDs = gl/6;
+>                 if(strfind(num2str(elementDs),'.'))
+>                     [g,gl] = sscanf(a{al},['p' unitAbbr '%d%c' elementAbbr '%d%c' unitAbbr '%d%c' elementAbbr '%d%c']);
+>                     % divide length of g by 8 to figure out how many element directories
+>                     % there are
+>                     elementDs = gl/8;
+>                     % reshape g
+>                     gr = reshape(g,8,elementDs);
+>                 else
+>                     % reshape g
+>                     gr = reshape(g,6,elementDs);
+>                 end
+>             else % element end with digit
+>                 [g,gl] = sscanf(a{al},['p' unitAbbr '%d' elementAbbr '%d' unitAbbr '%d' elementAbbr '%d']);
+>                 % divide length of g by 4 to figure out how many element directories
+>                 % there are
+>                 elementDs = gl/4;
+>                 if(strfind(num2str(elementDs),'.'))
+>                     [g,gl] = sscanf(a{al},['p' unitAbbr '%d%c' elementAbbr '%d' unitAbbr '%d%c' elementAbbr '%d']);
+>                     % divide length of g by 6 to figure out how many element directories
+>                     % there are
+>                     elementDs = gl/6;
+>                     % reshape g
+>                     gr = reshape(g,6,elementDs);
+>                 else
+>                     % reshape g
+>                     gr = reshape(g,4,elementDs);
+>                 end
+>             end
+>             % pre-allocate memory
+>             p1 = cell(1,elementDs);
+>             prefix = pwDir(1:fi(end-1));
+>             unitDName = levelName{levell-al+1};
+>             elementDName = levelName{levell-al};
+>             unitstr = strrep(namePattern{find(cell2array(strfind(namePattern,unitDName))==1)},unitDName,'');
+>             if(isempty(str2num(unitstr(end)))) % end with char
+>                 unitendchar = '%c';
+>             else
+>                 unitendchar = '';
+>             end
+>             elementstr = strrep(namePattern{find(cell2array(strfind(namePattern,elementDName))==1)},elementDName,'');
+>             if(isempty(str2num(elementstr(end)))) % end with char
+>                 elementendchar = '%c';
+>             else          
+>                 elementendchar = '';
+>             end
+>             for idx = 1:elementDs
+>                 p1{idx} = sprintf(['%s' unitAbbr ['%01d' unitendchar] elementAbbr ['%01d' elementendchar]...
+>                     unitAbbr ['%01d' unitendchar] elementAbbr ['%01d' elementendchar]], ...
+>                     prefix,gr(:,idx));
+>             end
+>             p = {p1{:}};
+>         end
+232a511
+> 
+234,258c513,526
+< if(Args.Group)
+<       destL = GROUPLEVEL;
+< elseif(Args.Sort)
+<       destLevel = 'sort';
+<       destL = SESSIONLEVEL;
+< elseif(Args.HighPass)
+<       destLevel = 'highpass';
+<       destL = SESSIONLEVEL;
+< elseif(Args.Eye)
+<       destLevel = 'eye';
+<       destL = SESSIONLEVEL;
+< elseif(Args.EyeFilt)
+<       destLevel = 'eyefilt';
+<       destL = SESSIONLEVEL;
+< elseif(Args.Lfp)
+<       destLevel = 'lfp';
+<       destL = SESSIONLEVEL;
+< elseif(Args.Session)
+<       destL = SESSIONLEVEL;
+< elseif(Args.Site)
+<       destL = SITELEVEL;
+< elseif(Args.Day)
+<       destL = DAYLEVEL;
+< elseif(Args.Days)
+<       destL = DAYSLEVEL;
+---
+> 
+> if(~isempty(Args.Level))
+>    if(levelConvert('LevelName',Args.Level)) % can find this level in levelName
+>        destL = levelConvert('LevelName',Args.Level);
+>    else
+>        destLevel = lower(Args.Level)
+>        for aa = 1:length(levelEqualName)
+>            for bb = 1:levell
+>                if(strfind(lower(levelEqualName{aa}),levelName{bb})==1)
+>                    destL = levelConvert('LevelName',levelName{bb});
+>                end
+>            end
+>        end
+>    end
+265,266c533,539
+<               % we are in the combinations directory so set curL to -1
+<               curL  = -1;
+---
+>         [p,n,e] = nptFileParts(p);
+>         curL='';
+>         for ii=1:size(levels,1)
+>             if ~isempty(strfind(lower(n),levels{ii,1}))
+>                 curL  = levels{ii,2} - 1;
+>             end
+>         end
+268,271c541,550
+<               % right now there is only one directory level below combinations so
+<               % if the current directory contains combinations but is not actually
+<               % the combinations directory, then curL has to be -2
+<               curL = -2;
+---
+>         while(~strcmp(lower(n),comboDName))
+>             [p,n,e] = nptFileParts(p);
+>         end
+>         [p,n,e] = nptFileParts(p);
+>         curL='';
+>         for ii=1:size(levels,1)
+>             if ~isempty(strfind(lower(n),levels{ii,1}))
+>                 curL  = levels{ii,2} - 2;
+>             end
+>         end
+288,291c567
+< 
+< %To get from one directory to another we will be forced to go through the
+< %session level.
+< if Args.Relative
+---
+> if(Args.Relative)
+318a595,600
+> if(~isempty(Args.GetPathUpto))
+>     if(strfind(pwDir,lower(Args.GetPathUpto)))
+>         a = strfind(pwDir,'/');
+>         p = strrep(pwDir,pwDir(a(find(a>strfind(pwDir,lower(Args.GetPathUpto)))):end),'');
+>     end
+> end
+\ No newline at end of file
+diff -rw miscellaneous/getEquivSession.m /Users/syen/Desktop/DPV/miscellaneous/getEquivSession.m
+10c10
+< Args = struct('EquivalentSessions',{''});
+---
+> Args = struct('EquivalentSessions',{''},'EquiLevel','','EquivalentDir',{''});
+15a16
+> if(~isempty(Args.EquivalentSessions))
+49a51,87
+> 
+> else
+>     for lowestLevel = levelConvert('levelName',Args.EquiLevel):-1:1
+>         if strcmp(cwd,getDataDirs('Level',levelConvert('levelNo',lowestLevel)))
+>             break;
+>         end
+>     end
+>     UpperLevel = getDataDirs('Level',lower(levelConvert('levelNo', levelConvert('levelName',Args.EquiLevel)+1)));
+>     esidx = strmatch(UpperLevel,Args.EquivalentDir);
+> %     LowerLevel = getDataDirs(lower(levelConvert('levelNo', levelConvert('levelName',Args.EquiLevel)-1)));
+> %     esidx1 = strmatch(LowerLevel,Args.EquivalentDir);
+>     if isempty(esidx)
+>         r=[];
+>         return
+>     end
+>     % find filesep positions in cwd
+>     fsidx = strfind(cwd,filesep);
+>     % get length of fsidx
+>     fsidxl = length(fsidx);
+>     % get string starting from the second last filesep
+>     gcstr = cwd(fsidx(fsidxl-(levelConvert('levelName',Args.EquiLevel)-lowestLevel)+1):end);
+>     gcstr = strrep(gcstr,'\','.');
+>     ridx = regexp({Args.EquivalentDir{esidx}},gcstr);
+>     if isempty(ridx)
+>         r=[];
+>         return
+>     elseif length(ridx)==1
+>         esidx2=1;
+>     else
+>         esidx2 = find(~cellfun('isempty',ridx));
+>     end
+>     if(isempty(esidx2))
+>         r = [];
+>     else
+>         r = Args.EquivalentDir{esidx(esidx2(1))};
+>     end
+> end
+\ No newline at end of file
+diff -rw miscellaneous/getOptArgs.m /Users/syen/Desktop/DPV/miscellaneous/getOptArgs.m
+26,27c26
+< %                 in ARGS will have their values subtracted by 1, with
+< %                 a minimum value of 0.
+---
+> %                 in ARGS will have their values subtracted by 1.
+233,234c232
+<                         % make sure value does not go below 0
+<                         args{l+1} = max([0 args{l+1} - 1]);
+---
+>                         args{l+1} = args{l+1} - 1;
+Only in /Users/syen/Desktop/DPV/miscellaneous: getReturnVal.m
+Only in /Users/syen/Desktop/DPV/miscellaneous: levelConvert.m
+diff -rw miscellaneous/logbar.m /Users/syen/Desktop/DPV/miscellaneous/logbar.m
+7,19c7,19
+< vert = get(hb,'vertices');
+< if(iscell(vert))
+<     for vidx = 1:length(vert)
+<         zi = find(vert{vidx}(:,2)==0);
+<         vert{vidx}(zi,2) = Args.ZeroValue;
+<         set(hb(vidx),'vertices',vert{vidx})
+<     end
+< else
+<       % find values that are zero
+<       zi = find(vert(:,2)==0);
+<       vert(zi,2) = Args.ZeroValue;
+<       set(hb,'vertices',vert);
+< end
+---
+> % vert = get(hb,'vertices');
+> % if(iscell(vert))
+> %     for vidx = 1:length(vert)
+> %         zi = find(vert{vidx}(:,2)==0);
+> %         vert{vidx}(zi,2) = Args.ZeroValue;
+> %         set(hb(vidx),'vertices',vert{vidx})
+> %     end
+> % else
+> %     % find values that are zero
+> %     zi = find(vert(:,2)==0);
+> %     vert(zi,2) = Args.ZeroValue;
+> %     set(hb,'vertices',vert);
+> % end
+20a21
+> set(hb,'BaseValue',0.1);
+Only in /Users/syen/Desktop/DPV/miscellaneous: modifyConfig.m
+
+getEquivSession renamed to getEquivData
+getDataDirs renamed to getDataOrder
+
+Modified to use getEquivData instead of getEquivSession:
+tutorialClass/@fypresult/fypresult.m
+
+Modified to use getDataOrder instead of getDataDirs:
+@nptdata/groupDirs.m
+@nptdata/ProcessCombination.m
+@nptdata/subsref.m
+@nptgroup/nptgroup.m
+@nptgroup/plot.m
+miscellaneous/checkObjCreate.m
+miscellaneous/getEquivData.m
+tutorialClass/@plusFiles/plusFiles.m

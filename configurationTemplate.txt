@@ -1,0 +1,17 @@
+*
+Cluster
+Group
+Session
+Site
+Day
+Days
+*
+cgns
+*
+cluster00s
+group0000
+session00
+site00
+*
+Group/Sort/HighPass/Eye/EyeFilt/Lfp
+*

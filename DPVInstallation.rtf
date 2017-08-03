@@ -1,0 +1,35 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+\cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 Monaco;}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww12940\viewh13060\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf0 This file will guide you how to do the installation of DPV Toolbox. \
+\
+First of all, make sure Matlab has been installed on the computer. Then do the following steps. \
+\
+Step 1: Get a copy of the DPV. \
+\
+Step 2: Create directory where you would like to store DPV and save the toolbox in that directory.\
+\
+Step 3: Add path. \
+1.	Start MATLAB;\
+2.	Go to File -> Set Path;\
+3.	In the dialog box, click \'93Add with Subfolders\'94, and then select the directory containing the toolbox. Click \'93Save\'94 and \'93Close\'94 to save the path for future sessions.\
+\
+Step 4: Set up Configuration file.\
+1.	In the \'93Current Directory\'94 Window, select the directory that contains the toolbox\
+2.	Copy the file named ConfigurationTemplate.txt\
+3.	In \'93Command Window\'94, type\
+\pard\pardeftab720\li1080\partightenfactor0
+\cf0 >> cd(prefdir)\
+The \'93Current Directory\'94 Window now shows the preference directory.\
+\pard\pardeftab720\partightenfactor0
+\cf0 4.	Paste configurationTemplate.txt in the directory, and rename it to be             configuration.txt.\
+\
+[Optional]\
+5.	In \'93Command Window\'94, run the function modifyConfig.m to modify the configuration file. You may type the following command in \'93Command Window\'94 to get help on how to use this function (for details please refer to DPV User Manual Section 3.2).\
+\pard\pardeftab720\li1080\partightenfactor0
+\cf0 >> help modifyConfig\
+}
