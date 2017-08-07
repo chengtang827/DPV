@@ -26,21 +26,21 @@ end
 % add code for plot options here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% read file but skip 1st row
-dfilename = obj.data.dlist(n).name;
-data = dlmread(dfilename,'',1,0);
+if ~exist('session1','var')
+    load([obj.data.dlist(1).folder '\' obj.data.dlist(1).name]);
+end
 
-% col 3 & 4 are x & y
-
-% col 5 is angle in degrees
-% but to display correctly, we need to multiply by -1 and add 90 degrees
-% then we will convert to radians as the sin and cos functions expect radians
-dangle = deg2rad(-data(:,5) + 90);
-
-% plot using quiver function
-quiver(data(:,3),data(:,4),cos(dangle),sin(dangle),Args.Color);
-title(dfilename)
-
+if ~exist('neurons','var')
+    load([obj.data.dlist(2).folder '\' obj.data.dlist(2).name]);
+end
+trial_spike = session1.trials(n);
+for i = 1:length(neurons)
+    neuron_spike = trial_spike.(cell2mat(neurons(i)));
+    scatter(neuron_spike,ones(length(neuron_spike),1).*i,'k','.');
+    hold on;
+end
+hold off;
+% @dirfiles/PLOT takes 'LabelsOff' as an example
 if(~Args.LabelsOff)
 	xlabel('X Axis')
 	ylabel('Y Axis')
