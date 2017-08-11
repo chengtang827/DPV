@@ -1,4 +1,4 @@
-function [obj, varargout] = raster(varargin)
+function [obj, varargout] = gaze(varargin)
 %@dirfiles Constructor function for DIRFILES class
 %   OBJ = dirfiles(varargin)
 %
@@ -24,9 +24,9 @@ Args.UnimportantArgs = {'RedoLevels','SaveLevels'};
 
 % variable specific to this class. Store in Args so they can be easily
 % passed to createObject and createEmptyObject
-Args.classname = 'raster';
+Args.classname = 'gaze';
 Args.matname = [Args.classname '.mat'];
-Args.matvarname = 'rt';
+Args.matvarname = 'gz';
 
 % To decide the method to create or load the object
 command = checkObjCreate('ArgsC',Args,'narginC',nargin,'firstVarargin',varargin);
@@ -51,10 +51,9 @@ end
 function obj = createObject(Args,varargin)
 
 % example object
-dlist(1) = nptDir('session1.mat');
-dlist(2) = nptDir('neuron_names.mat');
+dlist = nptDir('session1.mat');
 % get entries in directory
-load(dlist(1).name);
+load(dlist.name);
 
 dnum = length(session1.trials);
 
