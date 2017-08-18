@@ -163,10 +163,11 @@ if(~isempty(Args.Exclude))
     end
 end
 
+
 if (~checkMarkers(obj,Args.RedoValue,Args.Levels))
-    
+%this is no marker, we should process it    
     varinNum = size(varargin, 2);
-    % find the position of the argunebt Levels
+    % find the position of the argument Levels
     for k = 1:varinNum
         if(iscellstr(varargin(k)))
             findit = strcmp(varargin(k),'Levels');
