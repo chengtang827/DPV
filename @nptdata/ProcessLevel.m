@@ -180,10 +180,7 @@ if (~checkMarkers(obj,Args.RedoValue,Args.Levels))
     % check if object should be instantiated at the specific level
     if(isempty(Args.LevelObject))
         % LevelObject argument was not specified so check the object properties
-%         if(strcmp(get(obj,'ObjectLevel'),Args.Levels))
-%             Args.LevelObject = levelConvert('levelNo',nlevel);
-%         end
-        Args.LevelObject = levelConvert('levelNo',1);
+        Args.LevelObject = get(obj,'ObjectLevel');
     end
     nLevelObject = levelConvert('levelName',Args.LevelObject);
 
