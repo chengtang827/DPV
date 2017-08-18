@@ -4,6 +4,7 @@ function n = checkArguments(p,q,varargin)
 % again using the arguments specified now.
 
 % 'UnimportantArgs' means the arguments whose values can be ignored
+n=0;
 Args = struct('UnimportantArgs','');
 [Args,varargin] = getOptArgs(varargin,Args);
 
