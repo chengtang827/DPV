@@ -106,14 +106,20 @@ if sum(strcmp(f,'sessionname'))==1
 end
 
 % remove unnecessary field from s.Args
-for ii=1:nobj
-    % check for empty Args as it was causing errors
-    if(~isempty(s.Arg(ii).Args))
-        s.Arg(ii).Args = rmfield(s.Arg(ii).Args, {'NumericArguments', ...
-            'GroupPlots', 'GroupPlotIndex', ...
-            'ReturnVars', 'ArgsOnly'});
-    end
-end
+% for ii=1:nobj
+%     % check for empty Args as it was causing errors
+%     if(~isempty(s.Arg(ii).Args))
+%     	try
+% 			s.Arg(ii).Args = rmfield(s.Arg(ii).Args, {'NumericArguments', ...
+% 				'GroupPlots', 'GroupPlotIndex', ...
+% 				'ReturnVars', 'ArgsOnly'});
+% 		catch
+%         	% this is for old objects that have not been updated to use ReturnVars and ArgsOnly
+% 			s.Arg(ii).Args = rmfield(s.Arg(ii).Args, {'NumericArguments', ...
+% 				'GroupPlots', 'GroupPlotIndex'});
+% 		end
+%     end
+% end
 
 set (h0, 'UserData', {});
 set(h0, 'UserData', s);
