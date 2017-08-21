@@ -31,16 +31,16 @@ InspectGUI(pfpop)
 % the directories that contained valid data for the performance objects can now be extracted to
 % create other objects
 nd = nptdata(pfpop);
-ti = ProcessDirs(nd,'Object','timing','redolevels',5);
-InspectGUI(ti)
+[nd,tipop] = ProcessDirs(nd,'Object','timing','redolevels',5);
+InspectGUI(tipop)
 
 You can create a plot with 2 objects using the following:
 
-InspectGUI(pf,'addObjs',{ti},'SP',[2 1])
+InspectGUI(pfpop,'addObjs',{tipop},'SP',[2 1])
 
 If you want to place them side-by-side, you can do the following:
 
-InspectGUI(pf,'addObjs',{ti},'SP',[1 2])
+InspectGUI(pfpop,'addObjs',{tipop},'SP',[1 2])
 
 cd 080204/site01/session02/eye
 et = eyestarget('auto','redolevels',5);
@@ -49,5 +49,5 @@ cd highpass
 st = streamer('disco08020402_highpass',1);
 cd ..
 cd group0002/cluster01s
-is = ispikes(auto);
-InspectGUI(et,'addObjs',{et,is},'SP',[3 1],LinkedZoom)
+is = ispikes('auto');
+InspectGUI(et,'addObjs',{st,is},'SP',[3 1],'LinkedZoom')
