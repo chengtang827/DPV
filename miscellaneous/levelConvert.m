@@ -24,7 +24,7 @@ if(exist(prefdir,'dir')==7)
         b_levelName = content(index(1)+1:index(2)-1);
     end
 end
-n = '';
+n = [];
 if(~isempty(Args.levelNo))
     n = b_levelName{Args.levelNo};
 end
