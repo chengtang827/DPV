@@ -1,4 +1,5 @@
-% need nptReadStreamerFile, getDataDirs
+% need code from Contours directory, add Contours and read_files subdirectory to Matlab
+% path
 cd 073004/site01/session03
 % uses @performance/performance.m to create a performance object
 % if an object has been created beforehand and saved, it will load the saved object
@@ -6,7 +7,7 @@ pf1 = performance('auto');
 % uses @performance/plot.m to plot the results
 plot(pf1)
 
-cd ../../../080204/site01/session02
+cd ../../../081004/site01/session01
 % uses @performance/performance.m to compute another performance object
 pf2 = performance('auto');
 % uses @performance/plot.m to plot the results
@@ -42,11 +43,11 @@ If you want to place them side-by-side, you can do the following:
 
 InspectGUI(pfpop,'addObjs',{tipop},'SP',[1 2])
 
-cd 080204/site01/session02/eye
+cd 081004/site01/session01/eye
 et = eyestarget('auto','redolevels',5);
 cd ..
 cd highpass
-st = streamer('disco08020402_highpass',1);
+st = streamer('disco08100401_highpass',1);
 cd ..
 cd group0002/cluster01s
 is = ispikes('auto');
