@@ -26,7 +26,7 @@ InspectGUI(pf,'overallonly','sessionmeans')
 % now instead of creating the objects session by session, we will use ProcessDays to create all 
 % possible performance objects. And instead of loading pre-saved objects, we are going to recompute
 % both the performance object, and the eyestarget object, which is used to compute performance
-pfpop = ProcessDays(performance,'redolevels',5);
+pfpop = ProcessLevel(performance,'Levels','Days','redolevels',5);
 InspectGUI(pfpop)
 
 % the directories that contained valid data for the performance objects can now be extracted to
