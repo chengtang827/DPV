@@ -90,9 +90,9 @@ if(nobj>1 && ~s.OverPlot)
     end
 end
 if(~isempty(h))
-    LinkedZoom(h,'onx')
+    linkedzoom(h,'onx')
 elseif s.LinkedZoom & length(findobj(h0,'Type','axes'))>1
-    LinkedZoom(h0,'onx')
+    linkedzoom(h0,'onx')
 else
     zoom xon
 end
