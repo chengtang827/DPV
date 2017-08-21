@@ -41,19 +41,22 @@ for ii=1:nobj
         try
             [s.obj{ii}, outputs] = plot(s.obj{ii}, s.optArgs{ii}{:},'ReturnVars',{'Args'});
         catch
+        	% this is for old objects that have not been updated to use ReturnVars
             display(['Error: please add the argument ''ReturnVars'' to the ' ...
                 'respective plot function! Refer to @dirfiles/PLOT.']);
+            s.obj{ii} = plot(s.obj{ii}, s.optArgs{ii}{:});
+
         end
         edithandle = findobj(h0,'Tag','EditText1');
         set(edithandle,'String',num2str(n));
     else
         try
             [s.obj{ii}, outputs] = plot(s.obj{ii},n,s.optArgs{ii}{:},'ReturnVars',{'Args'});
-            %check if the plot is from unitymaze plot
-            %yes
         catch
+        	% this is for old objects that have not been updated to use ReturnVars
             display(['Error: please add the argument ''ReturnVars'' to the ' ...
                 'respective plot function! Refer to @dirfiles/PLOT.']);
+            s.obj{ii} = plot(s.obj{ii},n,s.optArgs{ii}{:});
         end
     end
     
@@ -71,7 +74,8 @@ end
 
 if s.HoldAxis
     ax = axis;
-    s.lm = limits(ax(3),ax(4));
+    % s.lm = limits(ax(3),ax(4));
+    s.lm = [ax(3),ax(4)];
 end
 
 
