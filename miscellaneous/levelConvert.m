@@ -8,10 +8,10 @@ Args = struct('levelNo','','levelName','');
 
 b_levelName = {'Cluster','Group','Session','Site','Day','Days'};
 cwd = pwd;
-
-if(exist(prefdir,'dir')==7)
+dpv_prefdir = getPrefDir;
+if(exist(dpv_prefdir,'dir')==7)
     % The preference directory exists
-    cd(prefdir)
+    cd(dpv_prefdir)
     % Check if the user created configuration file is saved in prefdir
     if(ispresent('configuration.txt','file'))
         content = textread('configuration.txt','%s');
