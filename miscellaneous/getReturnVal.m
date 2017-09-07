@@ -1,6 +1,7 @@
 function rv = getReturnVal(ReVal, ReValVal)
 
 rvarl = length(ReVal);
+rv = {''};
 if(rvarl>0)
      % assign requested variables to varargout
      for rvi = 1:rvarl

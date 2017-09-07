@@ -8,9 +8,11 @@ namePattern = {'cluster00s','group0000','session00','site00'};
 levelEqualName = {'Group/Sort/HighPass/Eye/EyeFilt/Lfp'};
 
 cwd = pwd;
-if(exist(prefdir,'dir')==7)
+%get path of this function
+dpv_prefdir = getPrefDir;
+if(exist(dpv_prefdir,'dir')==7)
     % The preference directory exists
-    cd(prefdir)
+    cd(dpv_prefdir)
     % Check if the user created configuration file is saved in prefdir
     if(ispresent('configuration.txt','file'))
         % Read Configuration.txt file for level information
