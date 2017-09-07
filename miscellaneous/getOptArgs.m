@@ -222,7 +222,7 @@ while (l<=al)
                 end
             else
                 for curField=FieldIdx' %if it is an alias it could be more than one.
-                    if (Fnames{curField,4})
+                    if (Fnames{curField,4}) && l < al
                         val=args{l+1};
                     else
                         %parameter is of flag type and is set (1=true)....
