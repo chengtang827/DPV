@@ -1,8 +1,8 @@
 function [p,varargout] = getDataOrder(varargin)
 %getDataOrder Return directory hierarchy information used in the Gray Lab.
 %   P = getDataOrder(LEVEL) returns the absolute path to LEVEL from the
-%   current directory. These are the recognized values for LEVEL: 
-%      'days', 'day', 'site', 'session', 'group', 'cluster', 'lfp', 'highpass', 
+%   current directory. These are the recognized values for LEVEL:
+%      'days', 'day', 'site', 'session', 'group', 'cluster', 'lfp', 'highpass',
 %      'eye', 'eyefilt', 'sort'.
 %      e.g. calling getDataOrder('site') from
 %      /Data/a1/site02/session03/group0004/cluster01s returns
@@ -15,25 +15,25 @@ function [p,varargout] = getDataOrder(varargin)
 %   [P,CWD] = getDataOrder(...,'CDNow') changes directory in addition to
 %   returning the path. The previous directory is returned in CWD.
 %
-%   This function only works going upwards because directory splits in 
-%   downward direction. This function does not check whether the 
+%   This function only works going upwards because directory splits in
+%   downward direction. This function does not check whether the
 %   directory actually exists.
 %
 %   P = getDataOrder(PREFIX) returns the prefix for the specified directory
 %   level. These are the recognized PREFIX values and their current return
 %   values:
-%      'CellPrefix'      'cluster'
-%      'GroupPrefix'     'group'
+%      'CellPrefix'      'cell'
+%      'ChannelPrefix'   'channel'
+%			 'ArrayPrefix'		 'array'
 %      'ComboPrefix'     'combinations'
 %      'SessionPrefix'   'session'
-%      'SitePrefix'      'site'
 %      'DayPrefix'       'day'
 %      'DaysPrefix'      'days'
 %   Note that the first argument is ignored so it can be anything.
 %
-%   P = getDataOrder('ShortName') returns the abbreviated name to the 
+%   P = getDataOrder('ShortName') returns the abbreviated name to the
 %   current directory so if we are in:
-%      /Data/a1/site02/session03/group0004/cluster01s, 
+%      /Data/a1/site02/session03/group0004/cluster01s,
 %   P is a1s2n3g4c1s. This can be used to shorten strings in the title of
 %   plots.
 %
@@ -41,7 +41,7 @@ function [p,varargout] = getDataOrder(varargin)
 %   directories which make up a combination directory.
 %      e.g. calling getDataOrder('GetClusterDirs') from
 %      /Data/a1/site02/session03/combinations/g2c1sg4c1s will return the
-%      following cell array: 
+%      following cell array:
 %      P{1} = '/Data/a1/site02/session03/group0002/cluster01s';
 %      P{2} = '/Data/a1/site02/session03/group0004/cluster01s';
 %   This can be used by objects that are instantiated in the combinations
@@ -50,22 +50,22 @@ function [p,varargout] = getDataOrder(varargin)
 %
 %   P = getDataOrder(...,'DirString',DIRSTRING) uses DIRSTRING instead of
 %   the current directory.
-%      e.g. getDataOrder('days','DirString','/Data/disco/080204/site01') 
+%      e.g. getDataOrder('days','DirString','/Data/disco/080204/site01')
 %      returns /Data/disco.
 
 %   (not implemented yet)
 %   P = getDataOrder('ShortDirName',DIRECTORIES) returns the abbreviated name
-%   for combination directories. 
+%   for combination directories.
 
-Args = struct('Level','','Group',0,'Sort',0,'HighPass',0,'Eye',0, ...
-	'EyeFilt',0,'Lfp',0,'Session',0,'Site',0,'Day',0,'Days',0,...
-    'LevelPrefix','','CellPrefix',0,'GroupPrefix',0,...
-	'SessionPrefix',0,'SitePrefix',0,'DayPrefix',0,'DaysPrefix',0,...
+Args = struct('Level','','Array',0,'Sort',0,'HighPass',0,'Eye',0, ...
+	'EyeFilt',0,'Lfp',0,'Session',0,'Day',0,'Days',0,...
+    'LevelPrefix','','CellPrefix',0,'ChannelPrefix',0,'Channel',0,...
+	'SessionPrefix',0,'ArrayPrefix',0,'DayPrefix',0,'DaysPrefix',0,...
     'ComboPrefix',0,'GetDirs',0,'GetClusterDirs',0,...
     'Relative',0,'ShortName',0,'CDNow',0,'DirString','','GetPathUpto','');
-Args.flags = {'Group','Sort','HighPass','Eye','EyeFilt','Lfp', ...
-	'Session','Site','Day','Days','Relative','CellPrefix','GroupPrefix', ...
-	'ComboPrefix','SessionPrefix','SitePrefix','DayPrefix','DaysPrefix', ...
+Args.flags = {'Channel','Array','Sort','HighPass','Eye','EyeFilt','Lfp', ...
+	'Session','Site','Day','Days','Relative','CellPrefix','ChannelPrefix', ...
+	'ComboPrefix','SessionPrefix','ArrayPrefix','DayPrefix','DaysPrefix', ...
 	'CDNow','GetDirs','GetClusterDirs','ShortName'};
 Args = getOptArgs(varargin,Args);
 
@@ -75,15 +75,16 @@ varargout{1} = '';
 % *************************************************************************
 % Default level information
 nptDataDir = '';
-levelName = lower({'Cluster','Group','Session','Site','Day','Days'});
+levelName = lower({'Cluster','Channel','Array','Session','Day','Days'});
 levelAbbrs = 'cgns';
-namePattern = {'cluster00s','group0000','session00','site00'};
+namePattern = {'cell00','channel0000','array00','session00','site00'};
 levelEqualName = {'Group/Sort/HighPass/Eye/EyeFilt/Lfp'};
 
 cwd = pwd;
-if(exist(prefdir,'dir')==7)
+dpv_prefdir = getPrefDir();
+if(exist(dpv_prefdir,'dir')==7)
     % The preference directory exists
-    cd(prefdir)
+    cd(dpv_prefdir)
     % Check if the user created configuration file is saved in prefdir
     if(ispresent('configuration.txt','file'))
         % Read Configuration.txt file for level information
@@ -114,7 +115,7 @@ levell = length(levelName);
 fschar = '/';
 pcfschar = '\';
 searchstr = ['%[^' fschar ']' fschar];
-% number of fileseps to subtract from the cluster directory to get to the 
+% number of fileseps to subtract from the cluster directory to get to the
 % beginning of the highest level directory (i.e. data directory)
 nfilesep = length(levelName)-2;
 for i = levell:-1:1
@@ -131,37 +132,37 @@ end
 % return directory name prefixes so that this function can be the sole
 % repository of directory name information, which makes it easy to make
 % changes if we ever change the directory names
-if(Args.Group)
-    if(levelConvert('LevelName','Group'))
-        Args.Level = 'Group';
+if(Args.Channel)
+    if(levelConvert('LevelName','Channel'))
+        Args.Level = 'channel';
+    end
+elseif(Args.Array)
+    if(levelConvert('LevelName','Array'))
+        Args.Level = 'array';
     end
 elseif(Args.Sort)
-    if(levelConvert('LevelName','Group'))
+    if(levelConvert('LevelName','Channel'))
         Args.Level = 'Sort';
     end
 elseif(Args.HighPass)
-    if(levelConvert('LevelName','Group'))
+    if(levelConvert('LevelName','Channel'))
         Args.Level = 'HighPass';
     end
 elseif(Args.Eye)
-    if(levelConvert('LevelName','Group'))
+    if(levelConvert('LevelName','Channel'))
         Args.Level = 'Eye';
     end
 elseif(Args.EyeFilt)
-    if(levelConvert('LevelName','Group'))
+    if(levelConvert('LevelName','Channel'))
         Args.Level = 'EyeFilt';
     end
 elseif(Args.Lfp)
-    if(levelConvert('LevelName','Group'))
+    if(levelConvert('LevelName','Channel'))
         Args.Level = 'Lfp';
     end
 elseif(Args.Session)
     if(levelConvert('LevelName','Session'))
         Args.Level = 'Session';
-    end
-elseif(Args.Site)
-    if(levelConvert('LevelName','Site'))
-        Args.Level = 'Site';
     end
 elseif(Args.Day)
     if(levelConvert('LevelName','Day'))
@@ -174,20 +175,20 @@ elseif(Args.Days)
 end
 
 if(Args.CellPrefix)
-    if(levelConvert('LevelName','Cluster'))
-        Args.LevelPrefix = 'cluster';
+    if(levelConvert('LevelName','Cell'))
+        Args.LevelPrefix = 'cell';
     end
-elseif(Args.GroupPrefix)
-    if(levelConvert('LevelName','Group'))
-        Args.LevelPrefix = 'group';
+elseif(Args.ChannelPrefix)
+    if(levelConvert('LevelName','Channel'))
+        Args.LevelPrefix = 'channel';
+    end
+elseif(Args.ArrayPrefix)
+    if(levelConvert('LevelName','Array'))
+        Args.LevelPrefix = 'array';
     end
 elseif(Args.SessionPrefix)
     if(levelConvert('LevelName','Session'))
         Args.LevelPrefix = 'session';
-    end
-elseif(Args.SitePrefix)
-    if(levelConvert('LevelName','Site'))
-        Args.LevelPrefix = 'site';
     end
 elseif(Args.DayPrefix)
     if(levelConvert('LevelName','Day'))
@@ -198,10 +199,10 @@ elseif(Args.DaysPrefix)
         Args.LevelPrefix = 'days';
     end
 end
-    
-    
-    
-    
+
+
+
+
 if(Args.ComboPrefix)
 	p = comboDName;
 	return
@@ -287,7 +288,7 @@ elseif(Args.ShortName)
                             p = [p Abbr num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
                         else % Without level abbr
                             p = [p astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1) num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
-                        end    
+                        end
                     else
                         p = [p astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1) num2str(str2num(astr(find(astr(:) >= 48 & astr(:) <= 57))))];
                     end
@@ -375,7 +376,7 @@ elseif(Args.GetDirs | Args.GetClusterDirs)
                 elementNo = length(elementstr) - 1;
                 elementendchar = '%c';
             else
-                elementNo = length(elementstr);            
+                elementNo = length(elementstr);
                 elementendchar = '';
             end
             for idx = 1:elementDs
@@ -436,7 +437,7 @@ elseif(Args.GetDirs | Args.GetClusterDirs)
                 elementNo = length(elementstr) - 1;
                 elementendchar = '%c';
             else
-                elementNo = length(elementstr);            
+                elementNo = length(elementstr);
                 elementendchar = '';
             end
             for idx = 1:elementDs
@@ -493,7 +494,7 @@ elseif(Args.GetDirs | Args.GetClusterDirs)
             elementstr = strrep(namePattern{find(cell2array(strfind(namePattern,elementDName))==1)},elementDName,'');
             if(isempty(str2num(elementstr(end)))) % end with char
                 elementendchar = '%c';
-            else          
+            else
                 elementendchar = '';
             end
             for idx = 1:elementDs
