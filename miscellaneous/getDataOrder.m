@@ -225,7 +225,11 @@ elseif(Args.ShortName)
     % /.../a1/site01/session01/group0002/cluster02s
     % get substring starting from character after 5th last filesep
     %dname = destLevel( (fi(end-nfilesep)+1):end );
-    dname = strrep(destLevel,[nptDataDir '/'],'');
+		if ~isempty(nptDataDir)
+	    dname = strrep(destLevel,[nptDataDir '/'],'');
+		else
+			dname = destLevel;
+		end
     p = [];
     % check if dname contains combinations
     if(isempty(strfind(dname,comboDName)))
