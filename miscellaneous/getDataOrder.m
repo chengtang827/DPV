@@ -233,20 +233,26 @@ elseif(Args.ShortName)
     p = [];
     % check if dname contains combinations
     if(isempty(strfind(dname,comboDName)))
-        for k = 1:(levell-1)
-            [token, dname] = strtok(dname,'/');
-            a{k} = token;
-        end
-        for kk = 1:(levell-1)
+				a = split(dname, filesep);
+				%remove redundant paorts
+				gname = regexprep(a{end}, '[0-9]*',''); %get rid of numbers
+				thislevel = levelConvert('levelName',gname);
+				a = a((length(a)-(levell - thislevel)):end);
+        %for k = 1:(levell-1)
+        %    [token, dname] = strtok(dname,'/');
+        %j    a{k} = token;
+        %end
+        for kk = 1:(levell-thislevel+1)
             astr = a{kk};
             astrnumber = str2num(astr(find(astr(:) >= 48 & astr(:) <= 57)));
             if(isempty(astrnumber))
                 p = [p astr];
             else
                 % Named with digits <><digits>
-                if(strcmpi(astr(1:min(find(astr(:) >= 48 & astr(:) <= 57))-1),levelName(levell-kk)))
-                    if(length(levelAbbrs)>=levelConvert('levelName',levelName{levell-kk}))
-                        Abbr = levelAbbrs(levelConvert('levelName',levelName{levell-kk}));
+								gname = regexprep(astr, '[0-9]*','');
+                if(strcmpi(gname,levelName(levell-kk+1)))
+                    if(length(levelAbbrs)>=levelConvert('levelName',levelName{levell-kk+1}))
+                        Abbr = levelAbbrs(levelConvert('levelName',levelName{levell-kk+1}));
                     else
                         Abbr = [];
                     end

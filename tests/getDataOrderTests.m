@@ -20,3 +20,10 @@ function testSecond(testcase)
   output = getDataOrder('day','DirString', input);
   verifyEqual(testcase, input, output);
 end
+
+function testShortName(testcase)
+  input = '/NewWorkingMemory/Wiesel/20170714/session03/array01/channel006/cell01';
+  output = getDataOrder('ShortName','DirString',input);
+  expected_output = 'Wiesel20170714s3a1c6u1';
+  verifyEqual(testcase, output, expected_output);
+end
