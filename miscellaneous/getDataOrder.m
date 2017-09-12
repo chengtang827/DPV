@@ -554,7 +554,9 @@ else
     [p,n,e] = fileparts(pwDir);
     curL='';
     for ii=1:size(levels,1)
-        if ~isempty(strfind(lower(n),levels{ii,1}))
+        if (~isempty(strfind(lower(n),levels{ii,1}))) ||...
+						%hack to recognize a day, i.e. a directory with only digits
+						(isempty(regexprep(n, '[0-9]*','')) && strcmpi(levels{ii,1},'day'))
             curL  = levels{ii,2};
         end
     end
