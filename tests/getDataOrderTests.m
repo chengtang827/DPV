@@ -14,3 +14,9 @@ function testFirst(testcase)
   cd(cwd);
   verifyEqual(testcase, dd, expected_output);
 end
+
+function testSecond(testcase)
+  input = '/Data/Wiesel/20170714';
+  output = getDataOrder('day','DirString', input);
+  verifyEqual(testcase, input, output);
+end
