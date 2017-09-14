@@ -1,6 +1,7 @@
 function n = checkcell(p,q,varargin)
 % This function is used for checking if two cell arrays are the same.
 
+n = 0;
 count = 0;
 
 if(iscell(p)&&iscell(q))
