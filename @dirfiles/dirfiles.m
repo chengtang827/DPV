@@ -14,8 +14,10 @@ function [obj, varargout] = dirfiles(varargin)
 
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0);
 Args.flags = {'Auto','ArgsOnly'};
-% The arguments which can be neglected during arguments checking
-Args.UnimportantArgs = {'RedoLevels','SaveLevels'};                            
+% Specify which arguments should be checked when comparing saved objects
+% to objects that are being asked for. Only arguments that affect the data
+% saved in objects should be listed here.
+Args.DataCheckArgs = {};                            
 
 [Args,modvarargin] = getOptArgs(varargin,Args, ...
 	'subtract',{'RedoLevels','SaveLevels'}, ...
