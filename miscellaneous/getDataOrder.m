@@ -24,7 +24,7 @@ function [p,varargout] = getDataOrder(varargin)
 %   values:
 %      'CellPrefix'      'cell'
 %      'ChannelPrefix'   'channel'
-%			 'ArrayPrefix'		 'array'
+%      'ArrayPrefix'		 'array'
 %      'ComboPrefix'     'combinations'
 %      'SessionPrefix'   'session'
 %      'DayPrefix'       'day'
