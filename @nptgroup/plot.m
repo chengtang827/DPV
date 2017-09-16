@@ -1,14 +1,16 @@
 function [obj,varargout] = plot(obj,varargin)
 %@nptgroup/plot Plot function for nptgroup class
 %   OBJ = plot(OBJ,N,'Object',{'CLASS',{'PLOT_OPTIONS'},{'CONSTRUCTOR_
-%   OPTIONS'}) loops over the cluster directories contained in OBJ, 
+%   OPTIONS'}}) loops over the cluster directories contained in OBJ, 
 %   instantiates an object of the type CLASS with 'auto' and
 %   'CONSTRUCTOR_OPTIONS', and calls the plot function of that object 
 %   with 'PLOT_OPTIONS'. 
 %
 %   e.g. plot(ng,1,'Object',{'ispikes',{'chunkSize',4}});
 
-Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Object','','GroupEvent',0,'GroupPlotSep','','ReturnVars',{''}, 'ArgsOnly',0);
+Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1, ...
+    'Object','','GroupEvent',0,'GroupPlotSep','','ReturnVars',{''}, ...
+    'ArgsOnly',0);
 Args.flags = {'LabelsOff','GroupEvent', 'ArgsOnly'};
 [Args,varargin2] = getOptArgs(varargin,Args, 'remove',{'GroupEvent'});
 
@@ -100,6 +102,9 @@ for i = 1:numDirs
         % from nptdata/plot will be handled properly
 		thisObj = plot(thisObj,cellN,plotOptions{:},'GroupPlots',numDirs, ...
 			'GroupPlotIndex',i,'Color',colors(i,:),varargin2{:});
+		if(i>1)
+			set(gca,'XTickLabel',[],'YTickLabel',[],'XLabel',[],'YLabel',[])
+		end
 %	end
     % reset axis position since Matlab7 changes the dimensions of the axis
     % after plotting.

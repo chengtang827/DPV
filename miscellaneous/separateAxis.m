@@ -8,9 +8,7 @@ function axesPositions = separateAxis(sAxis,numDirs)
 % get position of current axis
 axpos = get(gca,'Position');
 
-if(numDirs==1)
-	axesPositions = axpos;
-elseif(strcmpi(sAxis,'No'))
+if(strcmpi(sAxis,'No'))
 	axesPositions = repmat(axpos,numDirs,1);
 elseif(strcmpi(sAxis,'Horizontal'))
 	% divide width, which is the 3rd entry in axpos, into numDirs
@@ -26,4 +24,6 @@ elseif(strcmpi(sAxis,'Vertical'))
 	starty = axpos(2):subheight:(axpos(2)+axpos(4));
 	axesPositions = [repmat(axpos(1),numDirs,1) starty(1:(end-1))' ...
 			repmat(axpos(3),numDirs,1) repmat(subheight,numDirs,1)];
+else
+    axesPositions = axpos;
 end

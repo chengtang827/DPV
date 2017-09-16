@@ -7,11 +7,11 @@ function [obj, varargout] = nptgroup(varargin)
 %   CellList can be a dirlist as returned from nptDir of the cluster
 %   directories you want.
 
-Args = struct('RedoLevels',0,'SaveLevels',0,'Auto',0, ...
-	'CellName','cluster*','CellList',[],'NoSingles',0,'ClusterDirs',{''}, ...
-	'GroupDirs',{''},'GroupsFile','','GetClusterDirs',0, 'ArgsOnly',0,...
-    'TempFlag',0);
-Args.flags = {'Auto','NoSingles','GetClusterDirs','ArgsOnly','TempFlag'};
+Args = struct('RedoLevels',0,'SaveLevels',0,'Auto',0,'NoSingles',0, ...
+	'CellName','','CellsList',[],'CellDirs',{''}, ...
+	'CellsFile','','GroupDirs',{''},'GroupsFile','', ...
+    'GetCellDirs',0, 'ArgsOnly',0,'TempFlag',0);
+Args.flags = {'Auto','NoSingles','GetCellDirs','ArgsOnly','TempFlag'};
 [Args,varargin2] = getOptArgs(varargin,Args, ...
 	'subtract',{'RedoLevels','SaveLevels'}, ...
 	'shortcuts',{'redo',{'RedoLevels',1}; 'save',{'SaveLevels',1}});
@@ -79,7 +79,8 @@ if(~isempty(Args.GroupDirs))
 		% change to directory
 		cd(gd{idx})
 		% generate ClusterDirs using current directory
-		cellnames = getDataOrder('GetDirs');
+		% cellnames = getDataOrder('GetDirs');
+		cellnames = {pwd};
 		numcells = size(cellnames,2);
 		% check to see if the NoSingles argument was specified
 		if( (numcells>0 && Args.NoSingles==0) || (numcells>1 && Args.NoSingles==1) )
@@ -115,8 +116,12 @@ if(~isempty(Args.GroupDirs))
 	end
 else % if(isempty(Args.GroupDirs))
 	% figure out how many cluster directories there are
-	if(~isempty(Args.CellList))
-		glist = Args.CellList;
+	if( ~isempty(Args.CellsList) || ~isempty(Args.CellName) )
+		if(~isempty(Args.CellsList))
+			glist = Args.CellsList;
+		else
+			glist = dir(Args.CellName);
+		end
 		% get number of entries
 		gnum = size(glist,1);
 		cellnames = {};
@@ -128,12 +133,15 @@ else % if(isempty(Args.GroupDirs))
 				numcells = numcells + 1;
 			end
 		end
-	elseif(~isempty(Args.ClusterDirs))
-		cellnames = Args.ClusterDirs;
+	elseif(~isempty(Args.CellDirs))
+		cellnames = Args.CellDirs;
 		numcells = size(cellnames,2);
-    elseif(Args.GetClusterDirs)
+    elseif(Args.GetCellDirs)
         cellnames = getDataOrder('GetDirs');
         numcells = size(cellnames,2);
+    elseif(~isempty(Args.CellsFile))
+   		cellnames = textread(Args.CellsFile,'%s');
+        numcells = length(cellnames);
     else
         if(Args.TempFlag==0)
             ndg = ProcessLevel(nptdata,varargin{:});
