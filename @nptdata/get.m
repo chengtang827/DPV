@@ -19,7 +19,7 @@ elseif(Args.HoldAxis)
 elseif(Args.SessionDirs)
 	p = n.sessiondirs;
 elseif(Args.GroupPlotProperties)
-	p.separate = 'No';
+	p.separate = 'No';    % options are 'No', 'Horizontal', 'Vertical'
 elseif(Args.AnalysisLevel)
 	p = 'Single';
 elseif(Args.ObjectLevel)
