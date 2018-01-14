@@ -16,16 +16,19 @@ function [robj,data] = ProcessLevel(obj,varargin)
 %                          'AllIntra<Element>'   Groups of intra-item elements.
 %                          'AllPairs'        Groups of intra-item pairs.(p)
 %
-% LevelObject:  Indicates that the object should be instantiated at a specific level.
+% LevelObject:  Indicates that the object should be instantiated 
+%               at a specific level.
 % 
-% DataInit: Specifies the initial value od data. 
-%
-% nptLevelCmd:  Specify the level Performs the following command for each
-%               directory in that level, specified as a cell array, the
+% nptLevelCmd:  Specifies the level to perform the following command for each
+%               directory in that level, specified as a cell array. The
 %               first element is the Level name, the second one is the
 %               command.
 % 
-% DataPlusCmd: Specified if only need to plus the data of the object
+% DataInit: Specifies the initial value of additional data not 
+%           contained in objects. 
+%
+% DataPlusCmd: Specifies how additional data not contained in objects 
+%              should be combined
 %           
 %
 % Example 1: 
@@ -58,11 +61,11 @@ Args.classname = 'ProcessLevel';
 [Args,varargin2] = getOptArgs(varargin,Args,'shortcuts',{'Reprocess',{'RedoValue',1}});
 
 
-% if user select 'ArgsOnly', return only Args structure for an empty object
-% iteration? Deduct 1 from the Args.Level after processing one level.
-% if the Level is great than 1, just call the function again
-% if the Level is 1, that indicates we comes to the lowest level. Just do
-% what ProcessCell and ProcessTrail do.
+% If user selects 'ArgsOnly', return only Args structure for an empty object
+% Subtract 1 from Args.Level after processing one level.
+% If the Level is greater than 1, call the function again.
+% If the Level is 1, that indicates we are at the lowest level. Just do
+% what ProcessCell and ProcessTrial do.
 
 nlevel = levelConvert('levelName',Args.Levels);
 checkObjectLevel = 0;
@@ -164,10 +167,10 @@ if(~isempty(Args.Exclude))
 end
 
 
-if (~checkMarkers(obj,Args.RedoValue,Args.Levels))
-%this is no marker, we should process it    
+% if(~checkMarkers(obj,Args.RedoValue,Args.Levels))
+% there is no marker, so we should process it    
     varinNum = size(varargin, 2);
-    % find the position of the argument Levels
+    % find the position of the Levels argument
     for k = 1:varinNum
         if(iscellstr(varargin(k)))
             findit = strcmp(varargin(k),'Levels');
@@ -185,8 +188,8 @@ if (~checkMarkers(obj,Args.RedoValue,Args.Levels))
     nLevelObject = levelConvert('levelName',Args.LevelObject);
 
     mark1 = 0;
-    if(Args.LevelObject)
-        if(levelConvert('levelName',Args.LevelObject)==nlevel)
+    if(~isempty(Args.LevelObject))
+        if(nLevelObject==nlevel)
             if(position==1)
                 if(varinNum>2)
                     robj = feval(class(obj), 'auto', varargin{position+2:varinNum});
@@ -203,8 +206,8 @@ if (~checkMarkers(obj,Args.RedoValue,Args.Levels))
     end
 
     if(mark1==0)
-%         if(isempty(Args.nptLevelCmd) ||...
-%                 (~isempty(Args.nptLevelCmd) && nlevel~=levelConvert('levelName',Args.nptLevelCmd{1})))
+        if(isempty(Args.nptLevelCmd) || ...
+                (~isempty(Args.nptLevelCmd) && nlevel~=levelConvert('levelName',Args.nptLevelCmd{1})))
             if(~isempty(DirName))
                 list = nptDir(DirName);
             else
@@ -267,111 +270,117 @@ if (~checkMarkers(obj,Args.RedoValue,Args.Levels))
                         end
 
                         if(go_on)
-                            fprintf(['Processing  Level %i  ' levelConvert('levelNo',nlevel-1) ' ' item_name '\n'], nlevel-1);
                             cd (item_name)
-                            % check the present level, to decide if we need to
-                            % continue to call ProcessLevel
-%                             if(isempty(Args.nptLevelCmd) ||...
-%                                     (~isempty(Args.nptLevelCmd) && nlevel-1~=levelConvert('levelName',Args.nptLevelCmd{1})))
-                                if isempty(Args.AnalysisLevel)
-                                    if nlevel > nLevelObject+1
-                                        cmdstr = 'Level';
-                                    elseif nlevel == nLevelObject+1
-                                        cmdstr = 'feval';
-                                    end
-                                else%if(isempty(Args.AnalysisLevel))
-                                    if strcmp(Args.AnalysisLevel,'Single')
-                                        if nlevel > nLevelObject+1
-                                            cmdstr = 'Level';
-                                        elseif nlevel == nLevelObject+1
-                                            cmdstr = 'feval';
-                                        end
-                                    else
-                                        if nlevel == nLevelObject+3
-                                            cmdstr = 'Combination';
-                                        elseif nlevel > nLevelObject+1
-                                            cmdstr = 'Level';
-                                        elseif nlevel == nLevelObject+1
-                                            cmdstr = 'feval';
-                                        end
-                                    end
-                                end%(isempty(Args.AnalysisLevel))
-%                             elseif (~isempty(Args.nptLevelCmd) && nlevel-1==levelConvert('levelName',Args.nptLevelCmd{1}))
-%                                 eval(Args.nptLevelCmd{2});
-%                                 cmdstr = 'other';
-%                             end %if(isempty(Args.nptLevelCmd))
-                        
-                            
-                                switch cmdstr
-                                    case 'Level'
-                                        if(position==1)
-                                            if(varinNum>2)
-                                                [p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1),varargin{position+2:varinNum});
-                                            else
-                                                [p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1));
-                                            end
-                                        elseif(position==varinNum-2)
-                                            [p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1),varargin{1:varinNum-2});
-                                        else
-                                            [p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1),varargin{1:position-1},varargin{position+2:varinNum});
-                                        end
-                                        robj = plus(robj,p,varargin2{:});
-                                        if(~isempty(Args.DataPlusCmd))
-                                            eval(Args.DataPlusCmd);
-                                        end
-                                        cd ..
-                                    case 'Combination'
-                                        if(position==1)
-                                            if(varinNum>2)
-                                                [p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1),varargin{position+2:varinNum});
-                                            else
-                                                [p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1));
-                                            end
-                                        elseif(position==varinNum-2)
-                                            [p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1),varargin{1:varinNum-2});
-                                        else
-                                            [p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1),varargin{1:position-1},varargin{position+2:varinNum});
-                                        end
-                                        robj = plus(robj,p,varargin2{:});
-                                        if(~isempty(Args.DataPlusCmd))
-                                            eval(Args.DataPlusCmd);
-                                        end
-                                        cd ..
-                                    case 'feval'
-                                        if(isempty(Args.nptLevelCmd))
-                                            if(position==1)
-                                                if(varinNum>2)
-                                                    p = feval(class(obj), 'auto', varargin{:});
-                                                else
-                                                    p = feval(class(obj), 'auto');
-                                                end
-                                            elseif(position==varinNum-2)
-                                                p = feval(class(obj), 'auto', varargin{1:varinNum-2});
-                                            else
-                                                p = feval(class(obj), 'auto', varargin{1:position-1},varargin{position+2:varinNum});
-                                            end
-                                            robj = plus(robj,p,varargin2{:});
-                                        else
-                                            eval(Args.nptLevelCmd{2});
-                                        end
-                                        if(~isempty(Args.DataPlusCmd))
-                                            eval(Args.DataPlusCmd);
-                                        end
-                                        cd ..
-%                                     case 'other'
+                            % check if there are any markers that indicate we should skip this directory
+                            if(~checkMarkers(obj,Args.RedoValue,Args.Levels))
+								fprintf(['Processing  Level %i  ' levelConvert('levelNo',nlevel-1) ' ' item_name '\n'], nlevel-1);
+								% check the present level, to decide if we need to
+								% continue to call ProcessLevel
+								if(isempty(Args.nptLevelCmd) ||...
+										(~isempty(Args.nptLevelCmd) && nlevel-1~=levelConvert('levelName',Args.nptLevelCmd{1})))
+									if isempty(Args.AnalysisLevel)
+										if nlevel > nLevelObject+1
+											cmdstr = 'Level';
+										elseif nlevel == nLevelObject+1
+											cmdstr = 'feval';
+										end
+									else%if(isempty(Args.AnalysisLevel))
+										if strcmp(Args.AnalysisLevel,'Single')
+											if nlevel > nLevelObject+1
+												cmdstr = 'Level';
+											elseif nlevel == nLevelObject+1
+												cmdstr = 'feval';
+											end
+										else
+											if nlevel == nLevelObject+3
+												cmdstr = 'Combination';
+											elseif nlevel > nLevelObject+1
+												cmdstr = 'Level';
+											elseif nlevel == nLevelObject+1
+												cmdstr = 'feval';
+											end
+										end
+									end%(isempty(Args.AnalysisLevel))
+								elseif (~isempty(Args.nptLevelCmd) && nlevel-1==levelConvert('levelName',Args.nptLevelCmd{1}))
+									eval(Args.nptLevelCmd{2});
+									cmdstr = 'other';
+								end %if(isempty(Args.nptLevelCmd))
+						
+							
+								switch cmdstr
+									case 'Level'
+										if(position==1)
+											if(varinNum>2)
+												[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1),varargin{position+2:varinNum});
+											else
+												[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1));
+											end
+										elseif(position==varinNum-2)
+											[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1),varargin{1:varinNum-2});
+										else
+											[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',nlevel-1),varargin{1:position-1},varargin{position+2:varinNum});
+										end
+										robj = plus(robj,p,varargin2{:});
+										if(~isempty(Args.DataPlusCmd))
+											eval(Args.DataPlusCmd);
+										end
+										cd ..
+									case 'Combination'
+										if(position==1)
+											if(varinNum>2)
+												[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1),varargin{position+2:varinNum});
+											else
+												[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1));
+											end
+										elseif(position==varinNum-2)
+											[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1),varargin{1:varinNum-2});
+										else
+											[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',nlevel-1),varargin{1:position-1},varargin{position+2:varinNum});
+										end
+										robj = plus(robj,p,varargin2{:});
+										if(~isempty(Args.DataPlusCmd))
+											eval(Args.DataPlusCmd);
+										end
+										cd ..
+									case 'feval'
+										if(isempty(Args.nptLevelCmd))
+											if(position==1)
+												if(varinNum>2)
+													p = feval(class(obj), 'auto', varargin{:});
+												else
+													p = feval(class(obj), 'auto');
+												end
+											elseif(position==varinNum-2)
+												p = feval(class(obj), 'auto', varargin{1:varinNum-2});
+											else
+												p = feval(class(obj), 'auto', varargin{1:position-1},varargin{position+2:varinNum});
+											end
+											robj = plus(robj,p,varargin2{:});
+										else
+											eval(Args.nptLevelCmd{2});
+										end
+										if(~isempty(Args.DataPlusCmd))
+											eval(Args.DataPlusCmd);
+										end
+										cd ..
+                                    case 'other'
 %                                         if(~isempty(Args.DataPlusCmd))
 %                                             eval(Args.DataPlusCmd);
 %                                         end
-                                end
-                            
+										cd ..
+								end % switch cmdstr
+							else
+	                            fprintf(['Skipping  Level %i  ' levelConvert('levelNo',nlevel-1) ' ' item_name '\n'], nlevel-1);
+								cd ..
+                        	end % if(~checkMarkers(obj,Args.RedoValue,Args.Levels))
                         end % if(go_on)
                     end
                 end %if(list(i).isdir)
             end %for i=1:size(list,1)
-%         elseif (~isempty(Args.nptLevelCmd) && nlevel==levelConvert('levelName',Args.nptLevelCmd{1})) 
-%             eval(Args.nptLevelCmd{2});
-%         end %if(isempty(Args.nptLevelCmd))
+        elseif (~isempty(Args.nptLevelCmd) && nlevel==levelConvert('levelName',Args.nptLevelCmd{1})) 
+            eval(Args.nptLevelCmd{2});
+        end %if(isempty(Args.nptLevelCmd))
     end %if(mark1==0)
     % create marker if necessary
     createProcessedMarker(obj,Args.Levels);
-end
+% end %if(~checkMarkers(obj,Args.RedoValue,Args.Levels))
