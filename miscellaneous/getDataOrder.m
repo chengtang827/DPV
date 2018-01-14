@@ -89,24 +89,24 @@ if(exist(dpv_prefdir,'dir')==7)
     if(ispresent('configuration.txt','file'))
         % Read Configuration.txt file for level information
         content = textread('configuration.txt','%s');
+		index = find(cell2array(strfind(content,'*'))==1);
+		% Assign information to variables
+		if(index(1)==1)
+		    nptDataDir = '';
+		else
+		    nptDataDir = content{1};
+		end
+		levelName = lower(content(index(1)+1:index(2)-1));
+		if(index(2)+1== index(3))
+		    levelAbbrs = '';
+		else
+		    levelAbbrs = content{index(2)+1};
+		end
+		namePattern = content(index(3)+1:index(4)-1);
+		levelEqualName = content(index(4)+1:index(5)-1);
     end
 end
 cd(cwd)
-index = find(cell2array(strfind(content,'*'))==1);
-% Assign information to variables
-if(index(1)==1)
-    nptDataDir = '';
-else
-    nptDataDir = content{1};
-end
-levelName = lower(content(index(1)+1:index(2)-1));
-if(index(2)+1== index(3))
-    levelAbbrs = '';
-else
-    levelAbbrs = content{index(2)+1};
-end
-namePattern = content(index(3)+1:index(4)-1);
-levelEqualName = content(index(4)+1:index(5)-1);
 %**************************************************************************
 
 % define constants
