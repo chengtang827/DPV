@@ -12,6 +12,6 @@ if(~isempty(Args.ArgsC) && getfield(Args.ArgsC,'SaveLevels'))
     fprintf('Saving %s object...\n',getfield(Args.ArgsC,'classname'));
     eval([getfield(Args.ArgsC,'matvarname') ' = robj;']);
     % save object
-    eval(['save ' getfield(Args.ArgsC,'matname') ' ' getfield(Args.ArgsC,'matvarname')]);
+    eval(['save ' getfield(Args.ArgsC,'matname') ' ' getfield(Args.ArgsC,'matvarname') ' -v7.3']);
     n = 1;
 end
