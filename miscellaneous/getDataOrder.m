@@ -77,7 +77,7 @@ varargout{1} = '';
 nptDataDir = '';
 levelName = lower({'Cluster','Channel','Array','Session','Day','Days'});
 levelAbbrs = 'cgns';
-namePattern = {'cell00','channel0000','array00','session00','site00'};
+namePattern = {'cell00','channel000','array00','session00','site00'};
 levelEqualName = {'Group/Sort/HighPass/Eye/EyeFilt/Lfp'};
 
 cwd = pwd;
@@ -523,9 +523,8 @@ end
 destLevel = '';
 
 if(~isempty(Args.Level))
-   if(levelConvert('LevelName',Args.Level)) % can find this level in levelName
-       destL = levelConvert('LevelName',Args.Level);
-   else
+    destL = levelConvert('LevelName',Args.Level);
+    if(isempty(destL))
        destLevel = lower(Args.Level)
        for aa = 1:length(levelEqualName)
            for bb = 1:levell
