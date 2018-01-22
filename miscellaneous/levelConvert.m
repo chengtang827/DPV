@@ -6,7 +6,7 @@ function n = levelConvert(varargin)
 Args = struct('levelNo','','levelName','');
 [Args,varargin2] = getOptArgs(varargin,Args);
 
-b_levelName = {'Cluster','Group','Session','Site','Day','Days'};
+b_levelName = {'Cell','Channel','Array','Session','Day','Days'};
 cwd = pwd;
 dpv_prefdir = getPrefDir;
 if(exist(dpv_prefdir,'dir')==7)
