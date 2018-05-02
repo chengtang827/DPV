@@ -246,7 +246,9 @@ elseif(Args.ShortName)
             astr = a{kk};
             astrnumber = str2num(astr(find(astr(:) >= 48 & astr(:) <= 57)));
             if(isempty(astrnumber))
-                p = [p astr];
+                % no numbers, so it should be the name of the animal
+                % so we will just use the first letter
+                p = [p astr(1)];
             else
                 % Named with digits <><digits>
 								gname = regexprep(astr, '[0-9]*','');
