@@ -10,9 +10,9 @@ function [obj, varargout] = nptgroup(varargin)
 Args = struct('RedoLevels',0,'SaveLevels',0,'Auto',0,'NoSingles',0, ...
 	'CellName','','CellsList',[],'CellDirs',{''}, ...
 	'CellsFile','','GroupDirs',{''},'GroupsFile','', ...
-    'GetCellDirs',0, 'ArgsOnly',0,'TempFlag',0);
-Args.flags = {'Auto','NoSingles','GetCellDirs','ArgsOnly','TempFlag'};
-[Args,varargin2] = getOptArgs(varargin,Args, ...
+    'GetCellDirs',0, 'ArgsOnly',0);
+Args.flags = {'Auto','NoSingles','GetCellDirs','ArgsOnly'};
+[Args,modvarargin] = getOptArgs(varargin,Args, ...
 	'subtract',{'RedoLevels','SaveLevels'}, ...
 	'shortcuts',{'redo',{'RedoLevels',1}; 'save',{'SaveLevels',1}});
 
@@ -47,7 +47,7 @@ else
 			% no saved object so we will try to create one
 			% pass varargin in case createObject needs to instantiate
 			% other objects that take optional input arguments
-			obj = createObject(Args,varargin2{:});
+			obj = createObject(Args,modvarargin{:});
 		end
 	end
 end
@@ -143,12 +143,8 @@ else % if(isempty(Args.GroupDirs))
    		cellnames = textread(Args.CellsFile,'%s');
         numcells = length(cellnames);
     else
-        if(Args.TempFlag==0)
-            ndg = ProcessLevel(nptdata,varargin{:});
-        else
-            ndg = ProcessGroup(nptdata,varargin{:});
-        end
-		cellnames = ndg.SessionDirs;
+        ndg = ProcessLevel(nptdata,varargin{:});
+        cellnames = ndg.SessionDirs;
 		numcells = size(cellnames,2);
 		% glist = nptDir([Args.CellName 's']);
 		% glist = [glist ; nptDir([Args.CellName 'm'])];

@@ -77,7 +77,7 @@ varargout{1} = '';
 nptDataDir = '';
 levelName = lower({'Cluster','Channel','Array','Session','Day','Days'});
 levelAbbrs = 'cgns';
-namePattern = {'cell00','channel0000','array00','session00','site00'};
+namePattern = {'cell00','channel000','array00','session00','site00'};
 levelEqualName = {'Group/Sort/HighPass/Eye/EyeFilt/Lfp'};
 
 cwd = pwd;
@@ -89,24 +89,24 @@ if(exist(dpv_prefdir,'dir')==7)
     if(ispresent('configuration.txt','file'))
         % Read Configuration.txt file for level information
         content = textread('configuration.txt','%s');
+		index = find(cell2array(strfind(content,'*'))==1);
+		% Assign information to variables
+		if(index(1)==1)
+		    nptDataDir = '';
+		else
+		    nptDataDir = content{1};
+		end
+		levelName = lower(content(index(1)+1:index(2)-1));
+		if(index(2)+1== index(3))
+		    levelAbbrs = '';
+		else
+		    levelAbbrs = content{index(2)+1};
+		end
+		namePattern = content(index(3)+1:index(4)-1);
+		levelEqualName = content(index(4)+1:index(5)-1);
     end
 end
 cd(cwd)
-index = find(cell2array(strfind(content,'*'))==1);
-% Assign information to variables
-if(index(1)==1)
-    nptDataDir = '';
-else
-    nptDataDir = content{1};
-end
-levelName = lower(content(index(1)+1:index(2)-1));
-if(index(2)+1== index(3))
-    levelAbbrs = '';
-else
-    levelAbbrs = content{index(2)+1};
-end
-namePattern = content(index(3)+1:index(4)-1);
-levelEqualName = content(index(4)+1:index(5)-1);
 %**************************************************************************
 
 % define constants
@@ -246,7 +246,9 @@ elseif(Args.ShortName)
             astr = a{kk};
             astrnumber = str2num(astr(find(astr(:) >= 48 & astr(:) <= 57)));
             if(isempty(astrnumber))
-                p = [p astr];
+                % no numbers, so it should be the name of the animal
+                % so we will just use the first letter
+                p = [p astr(1)];
             else
                 % Named with digits <><digits>
 								gname = regexprep(astr, '[0-9]*','');
@@ -523,9 +525,8 @@ end
 destLevel = '';
 
 if(~isempty(Args.Level))
-   if(levelConvert('LevelName',Args.Level)) % can find this level in levelName
-       destL = levelConvert('LevelName',Args.Level);
-   else
+    destL = levelConvert('LevelName',Args.Level);
+    if(isempty(destL))
        destLevel = lower(Args.Level)
        for aa = 1:length(levelEqualName)
            for bb = 1:levell

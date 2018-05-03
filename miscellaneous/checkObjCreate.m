@@ -31,7 +31,8 @@ else
                 robj = eval(['l.' getfield(Args.ArgsC,'matvarname')]);
                 fprintf('\tComparing saved %s object arguments with new arguments specified...\n',getfield(Args.ArgsC,'classname'));
                 %comparing
-                sameFlag = checkArguments(Args.ArgsC,robj.data.Args);
+                rdata = robj.data;
+                sameFlag = checkArguments(Args.ArgsC,rdata.Args);
                 if(sameFlag)
                     fprintf('\tSaved %s object has same requested arguments...\n',getfield(Args.ArgsC,'classname'));
                     n = 'loadObj';
