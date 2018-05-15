@@ -68,6 +68,7 @@ ShortCuts='';
 % flag to indicate if we want to stop execution with an error or 
 % continue
 bError = 0;
+RemoveNumArgs=0;
 
 % get length of varargin
 nArgs = nargin - 2;
@@ -103,6 +104,9 @@ while(i <= nArgs)
                 ShortCutParams = varargin{i+1};
                 ShortCuts = lower(strvcat(ShortCutParams{:,1}));
                 i = i + 2;
+			case('removenumargs')
+				RemoveNumArgs = 1;
+                i = i + 1;
             case('stoponerror')
                 bError = 1;
                 i = i + 1;
@@ -127,6 +131,11 @@ while (NumArgCount<=numargs)&(~ischar(args{NumArgCount}))
 end
 if(NumArgCount>1)
     ArgStruct.NumericArguments = {args{1:(NumArgCount-1)}};
+	% check if we should remove numeric arguments
+	if(RemoveNumArgs)
+		[args,al] = removeargs(args,1,NumArgCount-1);
+		NumArgCount = 1;
+	end
 else
     ArgStruct.NumericArguments = [];
 end
