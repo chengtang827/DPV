@@ -121,14 +121,14 @@ if(~isempty(Args.Include))
         for Includei = 1:SelL
             if(iscell(Args.Include))
                 Args.Include{Includei} = [cwd filesep Args.Include{Includei}];
-                if ~isdir(Args.Include{Includei})
-                    Args.Include{Includei} = cwd;
-                end
+                % if ~isdir(Args.Include{Includei})
+                    % Args.Include{Includei} = cwd;
+					% end
             else
                 Args.Include = [cwd filesep Args.Include];
-                if ~isdir(Args.Include)
-                    Args.Include = cwd;
-                end
+                % if ~isdir(Args.Include)
+                    % Args.Include = cwd;
+					% end
             end
         end
     end
