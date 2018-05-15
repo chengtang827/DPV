@@ -57,9 +57,10 @@ else
     blnum = dirnums;                                
 end
 
+% grab current directory
+cwd = pwd;
+
 for n = dirnums
-	% grab current directory
-	cwd = pwd;
 	% change to corresponding directory
 	% call subsref so that the global variable nptDataDir will be checked
 	a(1) = struct('type','.','subs','SessionDirs');
@@ -90,14 +91,14 @@ for n = dirnums
             % get the number of cols for this object. Check here so the
             % user avoid having to type empty cell arrays when it is not
             % needed
-            [oRows,oCols] = size(Args.Objects);
+            [oRows,oCols] = size(Args.Objects{i});
             % check if there is a 3rd column in this object
             if(oCols>2)
                 % instantiate object with arguments in 3rd column of Objects
-				thisObj = feval(Args.Objects{i,1},'auto',Args.Objects{i,3}{:});
+				thisObj = feval(Args.Objects{i}{1},'auto',Args.Objects{i}{3}{:});
             else
                 % instantiate object with just the 'auto' argument
-				thisObj = feval(Args.Objects{i,1},'auto');
+				thisObj = feval(Args.Objects{i}{1},'auto');
             end
 			% plot object
 			if(changelayout)
@@ -107,13 +108,13 @@ for n = dirnums
             if(~isempty(thisObj))
 				if(n==blnum)
 					if(oCols>1)
-						plot(thisObj,Args.Objects{i,2}{:},'GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
-					else
+						plot(thisObj,Args.Objects{i}{2}{:},'GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
+                    else
 						plot(thisObj,'GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
 					end
 				else
 					if(oCols>1)
-						plot(thisObj,Args.Objects{i,2}{:},'LabelsOff','GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
+						plot(thisObj,Args.Objects{i}{2}{:},'LabelsOff','GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
 					else
 						plot(thisObj,'LabelsOff','GroupPlots',nobjs,'GroupPlotIndex',i,'ReturnVars',{'Args'});
 					end
@@ -135,7 +136,7 @@ for n = dirnums
 			% get last error
 			lm = lasterr;
 			fprintf('Warning: Problem plotting %s object!\n', ...
-				Args.Objects{i,1});
+				Args.Objects{i}{1});
 			fprintf('%s\n',lm);
 		end
 	end
