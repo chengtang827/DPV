@@ -141,3 +141,16 @@ Checks the local directory for data to process and returns the processed object,
 [robj,data] = ProcessLevel(obj,varargin);
 [robj,data] = ProcessCombination(obj,varargin);
 ```
+
+#### Optional Input arguments list of *ProcessLevel.m*
+
+| Input Argument Name  | Explanations |
+|--------------------- | ------------ |  
+|Levels                | Specifies the name of the highest processed level. |
+|Include               | Process selected items instead of all items found in the local directory, followed by a directory name or a cell array containing a list of directories.|
+|Exclude               | Skips the directories or items specified, followed by same items as in ‘Include’ . ‘Include’ and ‘Exclude’ cannot be specified together.|
+|LevelObject           | Indicates that the object should be instantiated at a specific level|
+|AnalysisLevel         | Specifies the AnalysisLevel property of the object. Accept value: ‘Single’, ‘All’, ‘Pairs’, ‘AllIntra<Level>’, ‘AllPairs’.|
+|DataInit              | Specifies the initial value of data.|
+|nptLevelCmd           | Specifies the level perform the following command of each directory in that level.|
+|DataPlusCmd           | Specified if only need to plus the data of the object.|  
