@@ -13,7 +13,8 @@ This toolbox consists of the following items:
 * Category gui
 * Category miscellaneous
 
-User may create their desired objects using the template @dirfiles, and then use parent class functions to process the data sets to obtain the object in each directory.
+User may create their desired objects using the template [@dirfiles](https://github.com/chengtang827/DPV/tree/roger-edits/%40dirfiles)
+ and then use parent class functions to process the data sets to obtain the object in each directory.
 
 # Setup
 
