@@ -72,11 +72,14 @@ The function ConfigModify.m enables the users to modify any number of the five c
 ### Examples
 ```matlab
 ModifyConfig(‘nptDataDir’, ‘/var/automount/opt/data/cat’);
-‘levelNames’ should be assigned as a cell array with the lowest level coming first and highest level coming last.
+```
+`levelNames` should be assigned as a cell array with the lowest level coming first and highest level coming last.
+```matlab
 ModifyConfig(‘levelNames’, {‘Cluster’, ‘Group’, ‘Session’, ‘Site’, ‘Day’, ‘Days’});
 ```
 
-levelAbbr’ and ‘NamePattern’ also need to be assigned in order of the levels ModifyConfig(‘levelAbbr’, ‘cgns’);
+`levelAbbr` and `NamePattern` also need to be assigned in order of the levels ModifyConfig(‘levelAbbr’, ‘cgns’);
+
 ```matlab
 ModifyConfig(‘NamePattern’, {‘cluster00s’, ‘group0000’, ‘session00’, ‘site00’})
 ```
