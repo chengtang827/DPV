@@ -18,29 +18,27 @@ User may create their desired objects using the template @dirfiles, and then use
 # Setup
 
 First of all, make sure Matlab has been installed on the computer. Then do the following steps.
+
 Step 1: Get a copy of the DPV.
+
 Step 2: Create directory where you would like to store DPV and save the toolbox in that directory.
+
 Step 3: Add path.
 1. Start MATLAB
-2. Change directories to the DPV directory: >> cd ~/matlab/DPV
-3. Add the sub-directories to your path: >> nptAddPath
+2. Change directories to the DPV directory: `>> cd ~/matlab/DPV`
+3. Add the sub-directories to your path: `>> nptAddPath`
 4. Go to File -> Set Path;
 5. In the dialog box, click “Save” and “Close”;
-1
+
 Step 4: Set up the configuration file.
 1. In the “Current Directory” Window, select the directory contains the toolbox
 2. Copy the file named ConfigurationTemplate.txt
-3. In “Command Window”, type
-
-```matlab
->> cd(prefdir)
-The “Current Directory” Window now shows the preference directory.
-4. Paste ConfigurationTemplate.txt in the directory, and rename it to be
+3. In “Command Window”, type `>> cd(prefdir)`.
+    The “Current Directory” Window now shows the preference directory.
+4. Paste [ConfigurationTemplate.txt](https://github.com/chengtang827/DPV/blob/roger-edits/configurationTemplate.txt) in the directory, and rename it to be
 Configuration.txt.
-5. In “Command Window”, run the function ModifyConfig.m to modify the
-configuration file. You may type the following command in “Command Window” to get help on how to use this function (see Section 3.2).
->> help modifyConfig
-```
+5. In “Command Window”, run the function [ModifyConfig.m](https://github.com/chengtang827/DPV/blob/roger-edits/miscellaneous/modifyConfig.m) to modify the
+configuration file. You may type the following command in “Command Window” to get help on how to use this function (see Section 3.2) `>> help modifyConfig`.
 
 # Configuration File
 
