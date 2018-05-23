@@ -7,9 +7,9 @@ This toolbox is suitable for the data sets with hierarchy/level. The names of th
 
 ## Structure of DPV
 This toolbox consists of the following items:
-* Two parent classes, @nptdata and @nptgroup;
-* Assistant class @event
-* Child class template @dirfiles
+* Two parent classes, [@nptdata](https://github.com/chengtang827/DPV/tree/roger-edits/%40nptdata) and [@nptgroup](https://github.com/chengtang827/DPV/tree/roger-edits/%40nptgroup);
+* Assistant class [@event](https://github.com/chengtang827/DPV/tree/roger-edits/%40event)
+* Child class template [@dirfiles](https://github.com/chengtang827/DPV/tree/roger-edits/%40dirfiles)
 * Category gui
 * Category miscellaneous
 
