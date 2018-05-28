@@ -11,7 +11,7 @@ function dd = getDataDirNew(newlevelname,varargin)
   end
   parts = split(usedir, filesep);
   %remove numbers to get the levelname
-  levelname = regexprep(parts{end}, "[0-9]*", '');
+  levelname = regexprep(parts{end}, '[0-9]*', '');
   if isempty(levelname) %removed all numbers, so must be day
     levelname = 'day';
   end
