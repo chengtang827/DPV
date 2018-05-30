@@ -28,7 +28,7 @@ else
 			% check for saved object in current directory (useful for HTCondor jobs)
 			if(~ispresent(getfield(Args.ArgsC,'matname'),'file','CaseInsensitive'))
 				% check if Args structure contains ObjectLevel
-				if(getfield(Args.ArgsC,'ObjectLevel'))
+				if isfield(Args.ArgsC,'ObjectLevel')
 					% check for saved object in appropriate directory
 					fprintf('No saved object found in the current directory. Checking designated directory...\n');
 					[pdir,cdir] = getDataOrder(Args.ArgsC.ObjectLevel,'relative','CDNow');
