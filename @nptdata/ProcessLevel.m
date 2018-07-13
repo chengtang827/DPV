@@ -273,7 +273,7 @@ if(mark1==0)
 						% need to convert type to one level down
 						currLevelNum = nlevel - 1;
 						currLevelName = levelConvert('levelNo',currLevelNum);
-                        if(Args.checkSkippingFlag && ~checkMarkers(obj,Args.RedoValue,currLevelName))
+                        if(~Args.checkSkippingFlag || ~checkMarkers(obj,Args.RedoValue,currLevelName))
 							fprintf(['Processing  Level %i  ' currLevelName ' ' item_name '\n'], currLevelNum);
 							% check the present level, to decide if we need to
 							% continue to call ProcessLevel
