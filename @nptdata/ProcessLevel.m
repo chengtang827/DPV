@@ -1,7 +1,7 @@
 function [robj,data] = ProcessLevel(obj,varargin)
 % Levels: The name of the highest processed level.
 %               
-% Include: Processes selected items instead of all
+% Include: Processes selected items specified in a cell array instead of all
 %               items found in the local directory. 
 %               
 % Exclude: Skips the directories or items specified in a cell array.
@@ -33,7 +33,7 @@ function [robj,data] = ProcessLevel(obj,varargin)
 %
 % Example 1: 
 % Only select 'a1' in level Day to process.
-% a = ProcessLevel(nptdata,'Levels','Days','Include','a1');
+% a = ProcessLevel(nptdata,'Levels','Days','Include',{'a1'});
 % Select both 'a2' and 'a4' in level Day to process.
 % a = ProcessLevel(nptdata,'Levels','Days','Include',{'a2','a4'});
 % Only process directories indicated in a cell array ndresp.SessionDirs
@@ -153,14 +153,14 @@ if(~isempty(Args.Exclude))
         for Excludei = 1:SkiL
             if(iscell(Args.Exclude))
                 Args.Exclude{Excludei} = [cwd filesep Args.Exclude{Excludei}];
-                if ~isdir(Args.Exclude{Excludei})
-                    Args.Exclude{Excludei} = cwd;
-                end
+%                 if ~isdir(Args.Exclude{Excludei})
+%                     Args.Exclude{Excludei} = cwd;
+%                 end
             else
                 Args.Exclude = [cwd filesep Args.Exclude];
-                if ~isdir(Args.Exclude)
-                    Args.Exclude = cwd;
-                end
+%                 if ~isdir(Args.Exclude)
+%                     Args.Exclude = cwd;
+%                 end
             end
         end
     end
@@ -222,50 +222,38 @@ if(mark1==0)
                     % check if Exclude is empty before doing the
                     % strcmpi operation
                     go_on = 0;
+					ffname = [pwd filesep item_name];
                     if( (isempty(Args.Include)) && (isempty(Args.Exclude)) )
                         go_on = 1;
                     elseif(~isempty(Args.Include) && (isempty(Args.Exclude)))
-                        if ~isempty(find(strmatch([pwd filesep item_name],Args.Include)))
-                            go_on = 1;
-                        else
-                            if iscell(Args.Include)
-                                for kk = 1:length(Args.Include)
-                                    if find(strmatch(Args.Include{kk},[pwd filesep item_name]))
-                                        if nlevel>=nLevelObject+1
-                                            go_on = 1;
-                                        end
-                                    end
-                                end
-                            else
-                                if ~isempty(find(strmatch(Args.Include,[pwd filesep item_name])))
+                        if(iscell(Args.Include))
+                            for kk = 1:length(Args.Include)
+                                if(~isempty(strfind(ffname,Args.Include{kk})))
                                     if nlevel>=nLevelObject+1
                                         go_on = 1;
                                     end
-                                end
-                            end
-                        end
+                                end  % if(~isempty(strfind(ffname,Args.Include{kk})))
+                            end  % for kk = 1:length(Args.Include)
+						end  % if(iscell(Args.Include))
                     elseif(~isempty(Args.Exclude) && (isempty(Args.Include)))
-                        if isempty(find(strmatch([pwd filesep item_name],Args.Exclude)))
-                            go_on = 1;
-                        else
-                            if iscell(Args.Exclude)
-                                for kk = 1:length(Args.Exclude)
-                                    if ~find(strmatch(Args.Exclude{kk},[pwd filesep item_name]))
-                                        if nlevel>=nLevelObject+1
-                                            go_on = 1;
-                                        end
-                                    end
-                                end
-                            else
-                                if isempty(find(strmatch(Args.Exclude,[pwd filesep item_name])))
-                                    if nlevel>=nLevelObject+1
-                                        go_on = 1;
-                                    end
+                        if(iscell(Args.Exclude))
+                            nExclude = length(Args.Exclude);
+                            bExclude = 0;
+                            for kk = 1:nExclude
+                                if(~isempty(strfind(ffname,Args.Exclude{kk})))
+                                    go_on = 0;
+                                    bExclude = 1;
+                                    break;
+                                end  % if(isempty(strfind(ffname,Args.Exclude{kk})))
+                            end  % for kk = 1:length(Args.Exclude)
+                            if(bExclude == 0)
+                                % means this directory is not in the Exclude list
+                                if nlevel>=nLevelObject+1
+                                    go_on = 1;
                                 end
                             end
-                        end
-                        
-                    end
+                        end  % if(iscell(Args.Exclude))                      
+                    end  % if( (isempty(Args.Include)) && (isempty(Args.Exclude)) )
 
                     if(go_on)
                         cd (item_name)
