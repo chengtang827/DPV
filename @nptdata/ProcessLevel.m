@@ -77,7 +77,7 @@ end
 if (Args.ArgsOnly)
     if((nlevel-1)>1)
         if (checkObjectLevel)
-            [robj, Args.childArgs] = ProcessLevel(obj, 'ArgsOnly', 'Levels', levelConvert('levelNo',nlevel-1));
+            [robj, Args.childArgs] = ProcessLevel(obj, 'ArgsOnly', 'checkSkippingFlag', 'Levels', levelConvert('levelNo',nlevel-1));
             Args.childArgs{2}.classname = 'ProcessLevel';
         else
             robj = obj;
