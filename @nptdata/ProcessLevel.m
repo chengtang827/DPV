@@ -55,8 +55,8 @@ function [robj,data] = ProcessLevel(obj,varargin)
 
 Args = struct('RedoValue',0,'Levels','','Include',{''},'Exclude',{''},...
     'LevelObject','','AnalysisLevel','',...
-    'DataInit',[],'nptLevelCmd',{''},'DataPlusCmd','','ArgsOnly',0);
-Args.flags = {'ArgsOnly'};
+    'DataInit',[],'nptLevelCmd',{''},'DataPlusCmd','','ArgsOnly',0,'checkSkippingFlag',0);
+Args.flags = {'ArgsOnly','checkSkippingFlag'};
 Args.classname = 'ProcessLevel';
 [Args,varargin2] = getOptArgs(varargin,Args,'shortcuts',{'Reprocess',{'RedoValue',1}});
 
@@ -273,7 +273,7 @@ if(mark1==0)
 						% need to convert type to one level down
 						currLevelNum = nlevel - 1;
 						currLevelName = levelConvert('levelNo',currLevelNum);
-                        if(~checkMarkers(obj,Args.RedoValue,currLevelName))
+                        if(Args.checkSkippingFlag && ~checkMarkers(obj,Args.RedoValue,currLevelName))
 							fprintf(['Processing  Level %i  ' currLevelName ' ' item_name '\n'], currLevelNum);
 							% check the present level, to decide if we need to
 							% continue to call ProcessLevel
