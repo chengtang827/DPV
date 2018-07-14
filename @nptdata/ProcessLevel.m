@@ -2,33 +2,34 @@ function [robj,data] = ProcessLevel(obj,varargin)
 % Levels: The name of the highest processed level.
 %               
 % Include: Processes selected items specified in a cell array instead of all
-%               items found in the local directory. 
+%     items found in the local directory. This only works for items
+%     in the local directory. Exact matches have to be used.
 %               
 % Exclude: Skips the directories or items specified in a cell array.
-%               This option cannot be used together with the SelectItems
-%               option. 
+%     Partial matches can be used to specify the exclusions, and items
+%     in subdirectories can also be included.
 %               
 % AnalysisLevel:  Specifies the AnalysisLevel property of OBJ.
-%               Accepted values are:
-%                          'Single'          Individual analysis
-%                          'All'             Groups of all units (a)
-%                          'Pairs'           Pairs of clusters.
-%                          'AllIntra<Element>'   Groups of intra-item elements.
-%                          'AllPairs'        Groups of intra-item pairs.(p)
+%     Accepted values are:
+%     'Single'              Individual analysis
+%     'All'                 Groups of all units (a)
+%     'Pairs'               Pairs of clusters.
+%     'AllIntra<Element>'   Groups of intra-item elements.
+%     'AllPairs'            Groups of intra-item pairs.(p)
 %
 % LevelObject:  Indicates that the object should be instantiated 
-%               at a specific level.
+%     at a specific level.
 % 
 % nptLevelCmd:  Specifies the level to perform the following command for each
-%               directory in that level, specified as a cell array. The
-%               first element is the Level name, the second one is the
-%               command.
+%     directory in that level, specified as a cell array. The
+%     first element is the Level name, the second one is the
+%     command.
 % 
 % DataInit: Specifies the initial value of additional data not 
-%           contained in objects. 
+%     contained in objects. 
 %
 % DataPlusCmd: Specifies how additional data not contained in objects 
-%              should be combined
+%     should be combined
 %           
 %
 % Example 1: 
@@ -38,6 +39,9 @@ function [robj,data] = ProcessLevel(obj,varargin)
 % a = ProcessLevel(nptdata,'Levels','Days','Include',{'a2','a4'});
 % Only process directories indicated in a cell array ndresp.SessionDirs
 % a = ProcessLevel(nptdata,'Levels','Days','Include',ndresp.SessionDirs);
+% Exclude directories matching 201806??, 201807??, and subdirectories
+% matching sessioneye and sessiontest from processing:
+% um = ProcessLevel(unitymaze,'Levels','Days','Exclude',{'201806','201807','sessioneye','sessiontest'})
 %
 % Example 2:
 % Combination data is going to be processed. Intra group pairs are preferred. 
@@ -58,7 +62,8 @@ Args = struct('RedoValue',0,'Levels','','Include',{''},'Exclude',{''},...
     'DataInit',[],'nptLevelCmd',{''},'DataPlusCmd','','ArgsOnly',0);
 Args.flags = {'ArgsOnly'};
 Args.classname = 'ProcessLevel';
-[Args,varargin2] = getOptArgs(varargin,Args,'shortcuts',{'Reprocess',{'RedoValue',1}});
+[Args,varargin2] = getOptArgs(varargin,Args,'shortcuts',{'Reprocess',{'RedoValue',1}}, ...
+					'remove',{'Include'});
 
 
 % If user selects 'ArgsOnly', return only Args structure for an empty object
@@ -167,11 +172,11 @@ if(~isempty(Args.Exclude))
 end
 
 
-varinNum = size(varargin, 2);
+varinNum = size(varargin2, 2);
 % find the position of the Levels argument
 for k = 1:varinNum
-    if(iscellstr(varargin(k)))
-        findit = strcmp(varargin(k),'Levels');
+    if(iscellstr(varargin2(k)))
+        findit = strcmp(varargin2(k),'Levels');
         if(findit)
             position = k;
         end
@@ -190,14 +195,14 @@ if(~isempty(Args.LevelObject))
     if(nLevelObject==nlevel)
         if(position==1)
             if(varinNum>2)
-                robj = feval(class(obj), 'auto', varargin{position+2:varinNum});
+                robj = feval(class(obj), 'auto', varargin2{position+2:varinNum});
             else
                 robj = feval(class(obj), 'auto');
             end
         elseif(position==varinNum-2)
-            robj = feval(class(obj), 'auto', varargin{1:varinNum-2});
+            robj = feval(class(obj), 'auto', varargin2{1:varinNum-2});
         else
-            robj = feval(class(obj), 'auto', varargin{1:position-1},varargin{position+2:varinNum});
+            robj = feval(class(obj), 'auto', varargin2{1:position-1},varargin2{position+2:varinNum});
         end
         mark1 = 1;
     end
@@ -226,9 +231,12 @@ if(mark1==0)
                     if( (isempty(Args.Include)) && (isempty(Args.Exclude)) )
                         go_on = 1;
                     elseif(~isempty(Args.Include) && (isempty(Args.Exclude)))
+						% parse Include arguments
                         if(iscell(Args.Include))
                             for kk = 1:length(Args.Include)
                                 if(~isempty(strfind(ffname,Args.Include{kk})))
+									% this item matches one of the Include arguments
+									% so continue
                                     if nlevel>=nLevelObject+1
                                         go_on = 1;
                                     end
@@ -236,11 +244,14 @@ if(mark1==0)
                             end  % for kk = 1:length(Args.Include)
 						end  % if(iscell(Args.Include))
                     elseif(~isempty(Args.Exclude) && (isempty(Args.Include)))
+						% parse Exclude arguments
                         if(iscell(Args.Exclude))
                             nExclude = length(Args.Exclude);
                             bExclude = 0;
                             for kk = 1:nExclude
                                 if(~isempty(strfind(ffname,Args.Exclude{kk})))
+									% this item matches one of the Exclude arguments
+									% so do not continue
                                     go_on = 0;
                                     bExclude = 1;
                                     break;
@@ -251,7 +262,7 @@ if(mark1==0)
                                 if nlevel>=nLevelObject+1
                                     go_on = 1;
                                 end
-                            end
+                            end  % if(bExclude == 0)
                         end  % if(iscell(Args.Exclude))                      
                     end  % if( (isempty(Args.Include)) && (isempty(Args.Exclude)) )
 
@@ -300,14 +311,14 @@ if(mark1==0)
 								case 'Level'
 									if(position==1)
 										if(varinNum>2)
-											[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',currLevelNum),varargin{position+2:varinNum});
+											[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',currLevelNum),varargin2{position+2:varinNum});
 										else
 											[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',currLevelNum));
 										end
 									elseif(position==varinNum-2)
-										[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',currLevelNum),varargin{1:varinNum-2});
+										[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',currLevelNum),varargin2{1:varinNum-2});
 									else
-										[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',currLevelNum),varargin{1:position-1},varargin{position+2:varinNum});
+										[p,pdata] = ProcessLevel(eval(class(obj)),'Levels',levelConvert('levelNo',currLevelNum),varargin2{1:position-1},varargin2{position+2:varinNum});
 									end
 									robj = plus(robj,p,varargin2{:});
 									if(~isempty(Args.DataPlusCmd))
@@ -316,14 +327,14 @@ if(mark1==0)
 								case 'Combination'
 									if(position==1)
 										if(varinNum>2)
-											[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',currLevelNum),varargin{position+2:varinNum});
+											[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',currLevelNum),varargin2{position+2:varinNum});
 										else
 											[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',currLevelNum));
 										end
 									elseif(position==varinNum-2)
-										[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',currLevelNum),varargin{1:varinNum-2});
+										[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',currLevelNum),varargin2{1:varinNum-2});
 									else
-										[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',currLevelNum),varargin{1:position-1},varargin{position+2:varinNum});
+										[p,pdata] = ProcessCombination(obj,'Levels',levelConvert('levelNo',currLevelNum),varargin2{1:position-1},varargin2{position+2:varinNum});
 									end
 									robj = plus(robj,p,varargin2{:});
 									if(~isempty(Args.DataPlusCmd))
@@ -333,14 +344,14 @@ if(mark1==0)
 									if(isempty(Args.nptLevelCmd))
 										if(position==1)
 											if(varinNum>2)
-												p = feval(class(obj), 'auto', varargin{:});
+												p = feval(class(obj), 'auto', varargin2{:});
 											else
 												p = feval(class(obj), 'auto');
 											end
 										elseif(position==varinNum-2)
-											p = feval(class(obj), 'auto', varargin{1:varinNum-2});
+											p = feval(class(obj), 'auto', varargin2{1:varinNum-2});
 										else
-											p = feval(class(obj), 'auto', varargin{1:position-1},varargin{position+2:varinNum});
+											p = feval(class(obj), 'auto', varargin2{1:position-1},varargin2{position+2:varinNum});
 										end
 										robj = plus(robj,p,varargin2{:});
 									else
