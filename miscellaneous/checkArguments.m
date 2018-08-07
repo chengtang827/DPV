@@ -52,7 +52,7 @@ if(isstruct(p)&&isstruct(q))
 						k = 1;
 					end
 				elseif(isnumeric(pp)&isnumeric(qq))
-					if(pp==qq)
+					if(isequal(pp,qq))
 						k = 1;
 					end
 				elseif(isstruct(pp)&isstruct(qq))

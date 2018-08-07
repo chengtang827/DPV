@@ -7,21 +7,23 @@ levelAbbrs = 'cgns';
 namePattern = {'cluster00s','group0000','session00','site00'};
 levelEqualName = {'Group/Sort/HighPass/Eye/EyeFilt/Lfp'};
 
-cwd = pwd;
-%get path of this function
-dpv_prefdir = getPrefDir;
-if(exist(dpv_prefdir,'dir')==7)
-    % The preference directory exists
-    cd(dpv_prefdir)
-    % Check if the user created configuration file is saved in prefdir
-    if(ispresent('configuration.txt','file'))
-        % Read Configuration.txt file for level information
-        content = textread('configuration.txt','%s');
-    end
+if(~isdeployed)
+	cwd = pwd;
+	%get path of this function
+	dpv_prefdir = getPrefDir;
+	if(exist(dpv_prefdir,'dir')==7)
+	    % The preference directory exists
+	    cd(dpv_prefdir)
+	    % Check if the user created configuration file is saved in prefdir
+	    if(ispresent('configuration.txt','file'))
+	        % Read Configuration.txt file for level information
+	        content = textread('configuration.txt','%s');
+	    end
+	end
+	cd(cwd)
+	index = find(cell2array(strfind(content,'*'))==1);
+	namePattern = content(index(3)+1:index(4)-1);
 end
-cd(cwd)
-index = find(cell2array(strfind(content,'*'))==1);
-namePattern = content(index(3)+1:index(4)-1);
 
 rind = strmatch(lower(levelConvert('levelNo',nlevel)),namePattern);
 
@@ -31,4 +33,3 @@ if(~isempty(rind))
 else
     r = '';
 end
-    
