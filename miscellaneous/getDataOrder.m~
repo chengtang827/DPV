@@ -80,35 +80,33 @@ levelAbbrs = 'cgns';
 namePattern = {'cell00','channel000','array00','session00','site00'};
 levelEqualName = {'Group/Sort/HighPass/Eye/EyeFilt/Lfp'};
 
-if(~isdeployed)
-	cwd = pwd;
-	dpv_prefdir = getPrefDir();
-	if(exist(dpv_prefdir,'dir')==7)
-	    % The preference directory exists
-	    cd(dpv_prefdir)
-	    % Check if the user created configuration file is saved in prefdir
-	    if(ispresent('configuration.txt','file'))
-	        % Read Configuration.txt file for level information
-	        content = textread('configuration.txt','%s');
-			index = find(cell2array(strfind(content,'*'))==1);
-			% Assign information to variables
-			if(index(1)==1)
-			    nptDataDir = '';
-			else
-			    nptDataDir = content{1};
-			end
-			levelName = lower(content(index(1)+1:index(2)-1));
-			if(index(2)+1== index(3))
-			    levelAbbrs = '';
-			else
-			    levelAbbrs = content{index(2)+1};
-			end
-			namePattern = content(index(3)+1:index(4)-1);
-			levelEqualName = content(index(4)+1:index(5)-1);
-	    end
-	end
-	cd(cwd)
+cwd = pwd;
+dpv_prefdir = getPrefDir();
+if(exist(dpv_prefdir,'dir')==7)
+    % The preference directory exists
+    cd(dpv_prefdir)
+    % Check if the user created configuration file is saved in prefdir
+    if(ispresent('configuration.txt','file'))
+        % Read Configuration.txt file for level information
+        content = textread('configuration.txt','%s');
+		index = find(cell2array(strfind(content,'*'))==1);
+		% Assign information to variables
+		if(index(1)==1)
+		    nptDataDir = '';
+		else
+		    nptDataDir = content{1};
+		end
+		levelName = lower(content(index(1)+1:index(2)-1));
+		if(index(2)+1== index(3))
+		    levelAbbrs = '';
+		else
+		    levelAbbrs = content{index(2)+1};
+		end
+		namePattern = content(index(3)+1:index(4)-1);
+		levelEqualName = content(index(4)+1:index(5)-1);
+    end
 end
+cd(cwd)
 %**************************************************************************
 
 % define constants
@@ -236,12 +234,12 @@ elseif(Args.ShortName)
     % check if dname contains combinations
     if(isempty(strfind(dname,comboDName)))
 		a = split(dname, filesep);
-		% fprintf('a: %s\n', a);
-        % fprintf('dname: %s, filesep: %c\n', dname, filesep);
+		fprintf('a: %s\n', 
+        
 		%remove redundant parts
 		gname = regexprep(a{end}, '[0-9]*',''); %get rid of numbers
 		thislevel = levelConvert('levelName',gname);
-		% fprintf('length(a): %d, levell: %d, thislevel: %d\n', length(a), levell, thislevel)
+		fprintf('length(a): %d, levell: %d, thislevel: %d\n', length(a), levell, thislevel)
 		a = a((length(a)-(levell - thislevel)):end);
         %for k = 1:(levell-1)
         %    [token, dname] = strtok(dname,'/');
