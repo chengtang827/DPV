@@ -17,7 +17,7 @@ defaultColors(7,:)= [0.9683    0.8772    0.6350];   %green
 
 rand('state',0)
 
-defaultColors(8:100,1)=rand(90,1);
+defaultColors(8:100,1)=rand(93,1);
 defaultColors(8:100,2)=240/240;
 defaultColors(8:100,3)=100/120;
 
