@@ -59,8 +59,8 @@ function [robj,data] = ProcessLevel(obj,varargin)
 
 Args = struct('RedoValue',0,'Levels','','Include',{''},'Exclude',{''},...
     'LevelObject','','AnalysisLevel','',...
-    'DataInit',[],'nptLevelCmd',{''},'DataPlusCmd','','ArgsOnly',0);
-Args.flags = {'ArgsOnly'};
+    'DataInit',[],'nptLevelCmd',{''},'DataPlusCmd','','ArgsOnly',0,'skipCheckingMarkers',0);
+Args.flags = {'ArgsOnly','skipCheckingMarkers'};
 Args.classname = 'ProcessLevel';
 [Args,varargin2] = getOptArgs(varargin,Args,'shortcuts',{'Reprocess',{'RedoValue',1}}, ...
 					'remove',{'Include'});
@@ -82,7 +82,7 @@ end
 if (Args.ArgsOnly)
     if((nlevel-1)>1)
         if (checkObjectLevel)
-            [robj, Args.childArgs] = ProcessLevel(obj, 'ArgsOnly', 'Levels', levelConvert('levelNo',nlevel-1));
+            [robj, Args.childArgs] = ProcessLevel(obj, 'ArgsOnly', 'skipCheckingMarkers', 'Levels', levelConvert('levelNo',nlevel-1));
             Args.childArgs{2}.classname = 'ProcessLevel';
         else
             robj = obj;
@@ -272,7 +272,7 @@ if(mark1==0)
 						% need to convert type to one level down
 						currLevelNum = nlevel - 1;
 						currLevelName = levelConvert('levelNo',currLevelNum);
-                        if(~checkMarkers(obj,Args.RedoValue,currLevelName))
+                        if(Args.skipCheckingMarkers || ~checkMarkers(obj,Args.RedoValue,currLevelName))
 							fprintf(['Processing  Level %i  ' currLevelName ' ' item_name '\n'], currLevelNum);
 							% check the present level, to decide if we need to
 							% continue to call ProcessLevel
