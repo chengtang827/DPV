@@ -235,7 +235,7 @@ elseif(Args.ShortName)
     p = [];
     % check if dname contains combinations
     if(isempty(strfind(dname,comboDName)))
-		a = split(dname, filesep);
+		a = strsplit(dname, filesep);
 		% fprintf('a: %s\n', a);
         % fprintf('dname: %s, filesep: %c\n', dname, filesep);
 		%remove redundant parts
