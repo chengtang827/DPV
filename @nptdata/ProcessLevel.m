@@ -3,7 +3,8 @@ function [robj,data] = ProcessLevel(obj,varargin)
 %               
 % Include: Processes selected items specified in a cell array instead of all
 %     items found in the local directory. This only works for items
-%     in the local directory. Exact matches have to be used.
+%     in the local directory. Partial matches can be used to specify the
+%     inclusion.
 %               
 % Exclude: Skips the directories or items specified in a cell array.
 %     Partial matches can be used to specify the exclusions, and items
@@ -39,9 +40,10 @@ function [robj,data] = ProcessLevel(obj,varargin)
 % a = ProcessLevel(nptdata,'Levels','Days','Include',{'a2','a4'});
 % Only process directories indicated in a cell array ndresp.SessionDirs
 % a = ProcessLevel(nptdata,'Levels','Days','Include',ndresp.SessionDirs);
-% Exclude directories matching 201806??, 201807??, and subdirectories
+% Include only directories 201806??, 201807??, and exclude subdirectories
 % matching sessioneye and sessiontest from processing:
-% um = ProcessLevel(unitymaze,'Levels','Days','Exclude',{'201806','201807','sessioneye','sessiontest'})
+% um = ProcessLevel(unitymaze,'Levels','Days','Include',{'201806','201807'}, ...
+%          'Exclude',{'sessioneye','sessiontest'})
 %
 % Example 2:
 % Combination data is going to be processed. Intra group pairs are preferred. 
@@ -62,6 +64,8 @@ Args = struct('RedoValue',0,'Levels','','Include',{''},'Exclude',{''},...
     'DataInit',[],'nptLevelCmd',{''},'DataPlusCmd','','ArgsOnly',0);
 Args.flags = {'ArgsOnly'};
 Args.classname = 'ProcessLevel';
+% removed the Include argument since it is supposed to apply only to the
+% directory in which this function was called
 [Args,varargin2] = getOptArgs(varargin,Args,'shortcuts',{'Reprocess',{'RedoValue',1}}, ...
 					'remove',{'Include'});
 
@@ -139,38 +143,8 @@ if(~isempty(Args.Include))
     end
 end
 
-if(~isempty(Args.Exclude))
-    % check if SkipLevelItem were specified with full pathnames
-    % we are going to assume that either all the directories are
-    % full-paths or relative-paths so we are going to just check the
-    % first entry
-    if(iscell(Args.Exclude))
-        [p,n] = nptFileParts(Args.Exclude{1});
-        SkiL = length(Args.Exclude);
-    else
-        [p,n] = nptFileParts(Args.Exclude);
-        SkiL = 1;
-    end
-    if(isempty(p))
-        % directories were specified with relative paths so we are going
-        % to add the current directory to it
-%         levelnum = levelConvert('levelName',Args.SkL);
-        for Excludei = 1:SkiL
-            if(iscell(Args.Exclude))
-                Args.Exclude{Excludei} = [cwd filesep Args.Exclude{Excludei}];
-%                 if ~isdir(Args.Exclude{Excludei})
-%                     Args.Exclude{Excludei} = cwd;
-%                 end
-            else
-                Args.Exclude = [cwd filesep Args.Exclude];
-%                 if ~isdir(Args.Exclude)
-%                     Args.Exclude = cwd;
-%                 end
-            end
-        end
-    end
-end
-
+% removed code to prepend the current working directory to the Exclude entries
+% so that they can be subdirectories that are excluded
 
 varinNum = size(varargin2, 2);
 % find the position of the Levels argument
@@ -227,43 +201,51 @@ if(mark1==0)
                     % check if Exclude is empty before doing the
                     % strcmpi operation
                     go_on = 0;
+                    bInclude = 0;
 					ffname = [pwd filesep item_name];
                     if( (isempty(Args.Include)) && (isempty(Args.Exclude)) )
                         go_on = 1;
-                    elseif(~isempty(Args.Include) && (isempty(Args.Exclude)))
+					elseif(~isempty(Args.Include))
 						% parse Include arguments
-                        if(iscell(Args.Include))
-                            for kk = 1:length(Args.Include)
-                                if(~isempty(strfind(ffname,Args.Include{kk})))
+						if(iscell(Args.Include))
+							for kk = 1:length(Args.Include)
+								if(~isempty(strfind(ffname,Args.Include{kk})))
 									% this item matches one of the Include arguments
 									% so continue
-                                    if nlevel>=nLevelObject+1
-                                        go_on = 1;
-                                    end
-                                end  % if(~isempty(strfind(ffname,Args.Include{kk})))
-                            end  % for kk = 1:length(Args.Include)
+									if nlevel>=nLevelObject+1
+										bInclude = 1;
+										go_on = 1;
+										% display('In include list')
+									end
+								end  % if(~isempty(strfind(ffname,Args.Include{kk})))
+							end  % for kk = 1:length(Args.Include)
+							if(~go_on)
+								fprintf('Not in include list %s\n',ffname);
+							end
 						end  % if(iscell(Args.Include))
-                    elseif(~isempty(Args.Exclude) && (isempty(Args.Include)))
+					elseif(~isempty(Args.Exclude))
 						% parse Exclude arguments
-                        if(iscell(Args.Exclude))
-                            nExclude = length(Args.Exclude);
-                            bExclude = 0;
-                            for kk = 1:nExclude
-                                if(~isempty(strfind(ffname,Args.Exclude{kk})))
+						if(iscell(Args.Exclude))
+							nExclude = length(Args.Exclude);
+							bExclude = 0;
+							for kk = 1:nExclude
+								if(~isempty(strfind(ffname,Args.Exclude{kk})))
 									% this item matches one of the Exclude arguments
 									% so do not continue
-                                    go_on = 0;
-                                    bExclude = 1;
-                                    break;
-                                end  % if(isempty(strfind(ffname,Args.Exclude{kk})))
-                            end  % for kk = 1:length(Args.Exclude)
-                            if(bExclude == 0)
-                                % means this directory is not in the Exclude list
-                                if nlevel>=nLevelObject+1
-                                    go_on = 1;
-                                end
-                            end  % if(bExclude == 0)
-                        end  % if(iscell(Args.Exclude))                      
+									go_on = 0;
+									fprintf('Excluding %s\n',ffname);
+									% display('In exclude list')
+									bExclude = 1;
+									break;
+								end  % if(isempty(strfind(ffname,Args.Exclude{kk})))
+							end  % for kk = 1:length(Args.Exclude)
+							if(bExclude == 0)
+								% means this directory is not in the Exclude list
+								if nlevel>=nLevelObject+1
+									go_on = 1;
+								end
+							end  % if(bExclude == 0)
+						end  % if(iscell(Args.Exclude))                      
                     end  % if( (isempty(Args.Include)) && (isempty(Args.Exclude)) )
 
                     if(go_on)
