@@ -217,9 +217,9 @@ elseif(Args.ShortName)
 	% otherwise, for some reason, strread returns the entire string instead of
 	% parsing it into parts
 	% if(strcmp(computer,'PCWIN'))
-		if(ischar(destLevel))
-			destLevel = strrep(destLevel,pcfschar,fschar);
-		end
+% 		if(ischar(destLevel))
+% 			destLevel = strrep(destLevel,pcfschar,fschar);
+% 		end
 	% end
     % find indicies corresponding to filesep
     % fi = strfind(destLevel,fschar);
