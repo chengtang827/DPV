@@ -1,6 +1,6 @@
 function [] = runProcessLevel()
 %RUNPROCESSLEVEL Separate the splitting into 4 jobs, generate a skipping
-%marking file to skip the splitting in the last job.
+%marking file to skip the splitting in the last job. This is a test.
 % 
 %   Detailed explanation goes here
 ProcessLevel(rplsplit,'Levels','Day','SaveLevels',3,'SkipLFP',1,'UseHPC',1,'Channels',1:32,...
