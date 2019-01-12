@@ -63,7 +63,9 @@ end  % if(Args.narginC==0)
 function [n,obj] = checkSavedObject(Args)
 fprintf('Loading saved %s object...\n',getfield(Args.ArgsC,'classname'));
 l = load(getfield(Args.ArgsC,'matname'));
-robj = eval(['l.' getfield(Args.ArgsC,'matvarname')]);
+% get variable name used to save object
+oname = fieldnames(l);
+robj = eval(['l.' oname{:}]);
 fprintf('\tComparing saved %s object arguments with new arguments specified...\n',getfield(Args.ArgsC,'classname'));
 %comparing
 rdata = robj.data;
