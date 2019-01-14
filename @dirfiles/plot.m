@@ -4,7 +4,7 @@ function [obj, varargout] = plot(obj,varargin)
 %   response.
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
-		  'ReturnVars',{''}, 'ArgsOnly',0);
+		  'ReturnVars',{''}, 'ArgsOnly',0, 'Cmds',''));
 Args.flags = {'LabelsOff','ArgsOnly'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
@@ -33,6 +33,15 @@ if(~Args.LabelsOff)
 end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% The following code allows any commands to be executed as part of each plot
+if(~isempty(Args.Cmds))
+    % save the current figure in case Args.Cmds switches to another figure
+    h = gcf;
+    eval(Args.Cmds)
+    % switch back to previous figure
+    figure(h);
+end
 
 RR = eval('Args.ReturnVars');
 lRR = length(RR);
