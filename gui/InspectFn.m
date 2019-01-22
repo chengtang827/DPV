@@ -90,12 +90,13 @@ if(nobj>1 && ~s.OverPlot)
     end
 end
 if(~isempty(h))
-    linkedzoom(h,'onx')
+    % linkedzoom(h,'onx')
+    linkaxes(h,'x')
 elseif s.LinkedZoom & length(findobj(h0,'Type','axes'))>1
-    linkedzoom(h0,'onx')
-else
-    zoom xon
+    % linkedzoom(h0,'onx')
+    linkaxes(findobj(h0,'Type','axes'),'x')
 end
+zoom xon
 
 f=fieldnames(s.obj{1});
 if sum(strcmp(f,'title'))==1
