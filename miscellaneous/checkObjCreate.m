@@ -1,8 +1,7 @@
 function [n,robj] = checkObjCreate(varargin)
 % This function is used to check the method to create the object
 
-Args = struct('ArgsC','','narginC','','firstVarargin','','saverplsplit',0);
-Args.flags = {'saverplsplit'};
+Args = struct('ArgsC','','narginC','','firstVarargin','');
 [Args,varargin] = getOptArgs(varargin,Args);
 % create empty object by default
 n = 'createObj';
