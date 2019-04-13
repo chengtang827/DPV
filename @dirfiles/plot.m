@@ -20,7 +20,6 @@ if(~isempty(Args.NumericArguments))
 	n = Args.NumericArguments{1};
 else
 	% plot all data
-	n = 1;
 end
 
 % add code for plot options here
