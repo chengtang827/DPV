@@ -60,18 +60,13 @@ dnum = size(dlist,1);
 
 % check if the right conditions were met to create object
 if(dnum>0)
-	% this is a valid object
-	% these are fields that are useful for most objects
-	data.numSets = 1;
-    data.Args = Args;
-	
 	% these are object specific fields
 	data.dlist = dlist;
 	% set index to keep track of which data goes with which directory
 	data.setIndex = [0; dnum];
 	
 	% create nptdata so we can inherit from it
-    
+	data.numSets = 1;    
     data.Args = Args;
 	n = nptdata(data.numSets,0,pwd);
 	d.data = data;
@@ -84,15 +79,13 @@ end
 
 function obj = createEmptyObject(Args)
 
-% useful fields for most objects
-data.numSets = 0;
-data.setNames = '';
-
 % these are object specific fields
 data.dlist = [];
 data.setIndex = [];
 
 % create nptdata so we can inherit from it
+% useful fields for most objects
+data.numSets = 0;
 data.Args = Args;
 n = nptdata(0,0);
 d.data = data;
