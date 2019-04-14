@@ -4,7 +4,7 @@ function [obj, varargout] = plot(obj,varargin)
 %   response.
 
 Args = struct('LabelsOff',0,'GroupPlots',1,'GroupPlotIndex',1,'Color','b', ...
-		  'ReturnVars',{''}, 'ArgsOnly',0, 'Cmds',''));
+		  'ReturnVars',{''}, 'ArgsOnly',0, 'Cmds','');
 Args.flags = {'LabelsOff','ArgsOnly'};
 [Args,varargin2] = getOptArgs(varargin,Args);
 
@@ -20,7 +20,6 @@ if(~isempty(Args.NumericArguments))
 	n = Args.NumericArguments{1};
 else
 	% plot all data
-	n = 1;
 end
 
 % add code for plot options here
