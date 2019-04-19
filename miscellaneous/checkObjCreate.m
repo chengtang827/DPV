@@ -70,11 +70,11 @@ fprintf('\tComparing saved %s object arguments with new arguments specified...\n
 rdata = robj.data;
 sameFlag = checkArguments(Args.ArgsC,rdata.Args);
 if(sameFlag)
-    fprintf('\tSaved %s object has same requested arguments...\n',getfield(Args.ArgsC,'classname'));
+    fprintf('\tSaved %s object has the same requested arguments...\n',getfield(Args.ArgsC,'classname'));
     n = 'loadObj';
     obj = robj;
 else
-    fprintf('\tDifferent requested arguments, creating new %s object...\n',getfield(Args.ArgsC,'classname'));
+    fprintf('\tArguments in the saved %s object are different, creating new %s object...\n',getfield(Args.ArgsC,'classname'));
     n = 'createObj';
     obj = [];
 end
