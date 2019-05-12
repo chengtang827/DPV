@@ -18,20 +18,32 @@ end
 if(~isempty(Args.NumericArguments))
 	% plot one data set at a time
 	n = Args.NumericArguments{1};
+	if(Args.Type1)
+		% code to plot 1 kind of plot
+		
+		% label the axis
+		xlabel('X Axis')
+		ylabel('Y Axis')
+	elseif(Args.Type2)
+		% code to plot another kind of plot
+		
+		% label the axis
+		xlabel('X Axis')
+		ylabel('Y Axis')
+	else
+		% code to plot yet another kind of plot
+		
+		% label the axis
+		xlabel('X Axis')
+		ylabel('Y Axis')
+	end	
+
+	% add an appropriate title
+	sdstr = get(obj,'SessionDirs');
+	title(getDataOrder('ShortName','DirString',sdstr{1}))
 else
 	% plot all data
 end
-
-% add code for plot options here
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% @dirfiles/PLOT takes 'LabelsOff' as an example
-if(~Args.LabelsOff)
-	xlabel('X Axis')
-	ylabel('Y Axis')
-end
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % The following code allows any commands to be executed as part of each plot
 if(~isempty(Args.Cmds))
