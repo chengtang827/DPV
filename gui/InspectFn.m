@@ -122,5 +122,12 @@ end
 %     end
 % end
 
-% set (h0, 'UserData', {});
-% set(h0, 'UserData', s);
+% get the current UserData in case any of the objects saved some data in there
+hstruct = get (h0, 'UserData');
+% merge fields found only in hstruct into s
+commonfields = intersect(fieldnames(hstruct),fieldnames(s));
+hfields = fieldnames(rmfield(hstruct,commonfields));
+for i = 1:length(hfields)
+    s = setfield(s,hfields{i}, getfield(hstruct,hfields{i}));
+end
+set(h0, 'UserData', s);
