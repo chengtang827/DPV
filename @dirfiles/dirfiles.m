@@ -8,9 +8,9 @@ function [obj, varargout] = dirfiles(varargin)
 %   % Instructions on dirfiles %
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%example [as, Args] = dirfiles('save','redo')
+%   Example [as, Args] = dirfiles('save','redo')
 %
-%dependencies: 
+%   Dependencies: 
 
 Args = struct('RedoLevels',0, 'SaveLevels',0, 'Auto',0, 'ArgsOnly',0, 'ObjectLevel', 'Session');
 Args.flags = {'Auto','ArgsOnly'};
