@@ -40,7 +40,7 @@ if(~isempty(Args.NumericArguments))
 
 	% add an appropriate title
 	sdstr = get(obj,'SessionDirs');
-	title(getDataOrder('ShortName','DirString',sdstr{1}))
+	title(getDataOrder('ShortName','DirString',sdstr{n}))
 else
 	% plot all data
 end
