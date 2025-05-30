@@ -69,7 +69,8 @@ ndirs = length(sdirs);
 cwd = pwd;
 for i = 1:ndirs
 	fprintf('Processing %s\n',sdirs{i});
-	cd(sdirs{i})
+    pathname = fileparts(sdirs{i});
+	cd(pathname)
     % check for skip.txt
     if(~checkMarkers(obj,Args.RedoValue,'dirs'))
 		if(useObj)
