@@ -40,7 +40,7 @@ function [robj,data] = ProcessDirs(obj,varargin)
 %      'nptDirCmd','data = {data{:} pwd length(nptDir)};');
 
 
-Args = struct('nptDirCmd','','Object','','DataInit',[],'RedoValue',0);
+Args = struct('nptDirCmd','','Object','','DataInit',[],'RedoValue',0,'SkipMissing',0);
 Args = getOptArgs(varargin,Args,'shortcuts',{'Reprocess',{'RedoValue',1}});
 
 robj = obj;
@@ -68,22 +68,32 @@ ndirs = length(sdirs);
 % get current directory
 cwd = pwd;
 for i = 1:ndirs
-	fprintf('Processing %s\n',sdirs{i});
-    pathname = fileparts(sdirs{i});
-	cd(pathname)
-    % check for skip.txt
-    if(~checkMarkers(obj,Args.RedoValue,'dirs'))
-		if(useObj)
-			% call the functional form of plus so we can pass additional
-			% flags to it. Also pass the optional input arguments to the
-			% constructor of the object.
-			data = plus(data,feval(Args.Object,'auto', ...
-				varargin{:}),varargin{:});
-		else
-			eval(Args.nptDirCmd);
-		end
-    else
-        fprintf('Skipped!\n');
+	if isfile(sdirs{i})
+		pathname = fileparts(sdirs{i});
+	else
+		pathname = sdirs{i};
+	end
+	fprintf('Processing %s\n',pathname);
+	if ~isdir(pathname)
+        if ~Args.SkipMissing
+            error(['Folder ' pathname ' does not exist']);
+        end
+	else
+		cd(pathname)
+        % check for skip.txt
+        if(~checkMarkers(obj,Args.RedoValue,'dirs'))
+		    if(useObj)
+			    % call the functional form of plus so we can pass additional
+			    % flags to it. Also pass the optional input arguments to the
+			    % constructor of the object.
+			    data = plus(data,feval(Args.Object,'auto', ...
+				    varargin{:}),varargin{:});
+		    else
+			    eval(Args.nptDirCmd);
+		    end
+        else
+            fprintf('Skipped!\n');
+        end
+	    cd(cwd);
     end
-	cd(cwd);
 end
